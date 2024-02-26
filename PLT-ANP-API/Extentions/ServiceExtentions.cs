@@ -1,5 +1,7 @@
-﻿using Contracts;
+﻿using Contract;
+using Contracts;
 using LoggerService;
+using Repository;
 
 namespace PLT_ANP_API.Extentions
 {
@@ -40,5 +42,7 @@ namespace PLT_ANP_API.Extentions
             services.AddSingleton<ILoggerManager, LoggerManager>();
         }
 
+        public static void ConfigureRepositoryManager(this IServiceCollection service) =>
+             service.AddScoped<IRepositoryManager, RepositoryManager>();
     }
 }
