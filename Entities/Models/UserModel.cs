@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity;
-
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Entities.Models
 {
@@ -18,5 +19,7 @@ namespace Entities.Models
         public DateTime? UpdatedDate { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
+
+        
     }
 }
