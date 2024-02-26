@@ -1,11 +1,7 @@
 ﻿using Contract;
 using Entities.Models;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+
 
 namespace Repository
 {
@@ -13,23 +9,17 @@ namespace Repository
     {
         public DealsRepository(RepositoryContext context): base(context)
         {
-                   
         }
-        public void CreateDeal(DealsModel deal)
-        {
-            Create(deal);
-        }
+        public void CreateDeal(DealsModel deal) => Create(deal);
+        
 
-        public async Task<IEnumerable<DealsModel>> GetAllDeals(bool trackChanges)
-        {
-            return await FindAll(trackChanges).OrderBy(x => x.Name).ToListAsync();
+        public async Task<IEnumerable<DealsModel>> GetAllDeals(bool trackChanges) => await FindAll(trackChanges).OrderBy(x => x.Name).ToListAsync();
 
-        }
+        
 
-        public async Task<DealsModel> GetDeal(Guid id, bool trackChanges)
-        {
-            return await FindByCondition(x => x.Id == id, trackChanges).SingleOrDefaultAsync();
-        }
+        public async Task<DealsModel> GetDeal(Guid id, bool trackChanges) => 
+            await FindByCondition(x => x.Id == id, trackChanges).SingleOrDefaultAsync();
+        
     }
     
 }

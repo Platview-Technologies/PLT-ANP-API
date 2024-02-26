@@ -12,6 +12,8 @@ LogManager.LoadConfiguration(string.Concat(Directory.GetCurrentDirectory(), "./n
 builder.Services.ConfigureCors();
 builder.Services.ConfigureIISIntegration();
 builder.Services.ConfigureLoggerService();
+// Configure SQL Context and pass it the IConfiguration class to get the connection string.
+builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
 
 builder.Services.AddControllers();
