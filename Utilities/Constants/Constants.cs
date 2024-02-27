@@ -50,6 +50,8 @@ namespace Utilities.Constants
         public const string ClientCertificate = "EntrustClientCert";
         public const string ServiceCertificate = "Servicecertificate";
         public const string entrustcertificate = "entrustcertificate";
+        public const string Deal = "Deal";
+        public const string Deals = "Deals";
 
 
 

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.HttpOverrides;
 using PLT_ANP_API.Extentions;
 using NLog;
+using PLT_ANP_API.Presentation.ActionFilters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,8 +16,13 @@ builder.Services.ConfigureLoggerService();
 // Configure SQL Context and pass it the IConfiguration class to get the connection string.
 builder.Services.ConfigureSqlContext(builder.Configuration);
 builder.Services.ConfigureRepositoryManager();
+builder.Services.ConfigureServiceManager();
 
-builder.Services.AddControllers();
+builder.Services.AddAutoMapper(typeof(Program));
+builder.Services.AddScoped<ValidationFilterAttribute>();
+
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(PLT_ANP_API.Presentation.AssemblyReference).Assembly);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

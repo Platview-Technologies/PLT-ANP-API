@@ -3,6 +3,8 @@ using Contracts;
 using LoggerService;
 using Microsoft.EntityFrameworkCore;
 using Repository;
+using Service.Contract;
+using Service;
 
 namespace PLT_ANP_API.Extentions
 {
@@ -52,5 +54,7 @@ namespace PLT_ANP_API.Extentions
                 opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
         }
 
+        public static void ConfigureServiceManager(this IServiceCollection services) =>
+            services.AddScoped<IServiceManager, ServiceManager>();
     }
 }

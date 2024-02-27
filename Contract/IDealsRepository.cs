@@ -8,5 +8,6 @@ namespace Contract
         void CreateDeal(DealsModel deal);
         Task<IEnumerable<DealsModel>> GetAllDeals(bool trackChanges);
         Task<DealsModel> GetDeal(Guid id, bool trackChanges);
+        Task<DealsModel> GetDealByName(string client,string name, bool trackChanges);
     }
 }

@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Repository
 {
-    public class DealsRepository : RepositoryBase<DealsModel, Guid>, IDealsRepository
+    internal class DealsRepository : RepositoryBase<DealsModel, Guid>, IDealsRepository
     {
         public DealsRepository(RepositoryContext context): base(context)
         {
@@ -15,11 +15,13 @@ namespace Repository
 
         public async Task<IEnumerable<DealsModel>> GetAllDeals(bool trackChanges) => await FindAll(trackChanges).OrderBy(x => x.Name).ToListAsync();
 
-        
-
         public async Task<DealsModel> GetDeal(Guid id, bool trackChanges) => 
             await FindByCondition(x => x.Id == id, trackChanges).SingleOrDefaultAsync();
-        
+
+        public async Task<DealsModel> GetDealByName(string client, string name, bool trackChanges) =>
+            await FindByCondition(x => x.ClientName.ToLower() == client, trackChanges)
+            .Where(x => x.Name.ToLower() == name.ToLower())
+            .SingleOrDefaultAsync();
     }
     
 }
