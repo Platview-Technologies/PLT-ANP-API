@@ -5,6 +5,12 @@ using Microsoft.EntityFrameworkCore;
 using Repository;
 using Service.Contract;
 using Service;
+using Entities.Models;
+using Microsoft.AspNetCore.Identity;
+using Entities.ConfigurationModels;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace PLT_ANP_API.Extentions
 {
@@ -56,5 +62,65 @@ namespace PLT_ANP_API.Extentions
 
         public static void ConfigureServiceManager(this IServiceCollection services) =>
             services.AddScoped<IServiceManager, ServiceManager>();
+
+        /// <summary>
+        /// Configures the identity system for user authentication and authorization.
+        /// </summary>
+        public static void ConfigureIdentity(this IServiceCollection services)
+        {
+            var builder = services.AddIdentity<UserModel, IdentityRole>(o =>
+            {
+                // Configure password requirements
+                o.Password.RequireDigit = true;
+                o.Password.RequireLowercase = false;
+                o.Password.RequireNonAlphanumeric = false;
+                o.Password.RequireUppercase = false;
+                o.Password.RequiredLength = 5;
+                o.User.RequireUniqueEmail = true;
+                o.SignIn.RequireConfirmedEmail = true;
+                o.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultEmailProvider;
+            })
+            .AddEntityFrameworkStores<RepositoryContext>()
+            .AddDefaultTokenProviders();
+        }
+
+        /// <summary>
+        /// Configures JWT authentication for securing API endpoints.
+        /// </summary>
+        public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
+        {
+            var jwtConfiguration = new JwtConfiguration();
+            configuration.Bind(jwtConfiguration.Section, jwtConfiguration);
+
+            var secretKey = Environment.GetEnvironmentVariable("SECRET");
+
+            services.AddAuthentication(opt =>
+            {
+                opt.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            }).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters
+                {
+                    // Validate the issuer of the token
+                    ValidateIssuer = true,
+                    // Validate the audience of the token
+                    ValidateAudience = true,
+                    // Validate the expiration time of the token
+                    ValidateLifetime = true,
+                    // Validate the signing key of the token
+                    ValidateIssuerSigningKey = true,
+                    // Set the valid issuer and audience
+                    ValidIssuer = jwtConfiguration.ValidIssuer,
+                    ValidAudience = jwtConfiguration.ValidAudience,
+                    // Set the signing key
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey))
+                };
+            });
+        }
+        public static void AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"));
+        }
     }
 }

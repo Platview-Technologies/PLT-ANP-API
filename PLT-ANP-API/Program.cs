@@ -3,6 +3,8 @@ using PLT_ANP_API.Extentions;
 using NLog;
 using PLT_ANP_API.Presentation.ActionFilters;
 using Contracts;
+using Microsoft.AspNetCore.Mvc;
+using PLT_ANP_API.Presentation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +23,21 @@ builder.Services.ConfigureServiceManager();
 
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<ValidationFilterAttribute>();
+// configure identity user
+builder.Services.AddAuthentication();
+// identity
+builder.Services.ConfigureIdentity();
+//jwt
+builder.Services.ConfigureJWT(builder.Configuration);
+// IOptions
+builder.Services.AddJwtConfiguration(builder.Configuration);
 
+builder.Services.Configure<ApiBehaviorOptions>(options =>
+{
+    options.SuppressModelStateInvalidFilter = true;
+});
 builder.Services.AddControllers()
-    .AddApplicationPart(typeof(PLT_ANP_API.Presentation.AssemblyReference).Assembly);
+    .AddApplicationPart(typeof(AssemblyReference).Assembly);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
