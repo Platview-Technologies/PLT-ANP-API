@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities.Exceptions
 {
-    public class BadRequestException : Exception
+    public class BadRequestException: Exception
     {
         protected BadRequestException(string message)
            : base(message)

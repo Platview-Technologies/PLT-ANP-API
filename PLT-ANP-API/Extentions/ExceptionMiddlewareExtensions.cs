@@ -28,6 +28,7 @@ namespace PLT_ANP_API.Extentions
                             // Use the switch statement to return the appropriate error status code
                             NotFoundException => StatusCodes.Status404NotFound,
                             BadRequestException => StatusCodes.Status400BadRequest,
+                            UnAuthorizedException => StatusCodes.Status401Unauthorized,
                             //InvalidCredentialsException => StatusCodes.Status401Unauthorized,
                             //ActivateUserException => StatusCodes.Status406NotAcceptable,
                             //EntrustException => StatusCodes.Status400BadRequest,

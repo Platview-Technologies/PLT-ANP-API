@@ -25,6 +25,5 @@ namespace Shared.DTOs
         [Required(ErrorMessage = "Email is required")]
         [DataType(DataType.EmailAddress)]
         public string? Email { get; init; }
-        public ICollection<string> Roles { get; init; }
     }
 }

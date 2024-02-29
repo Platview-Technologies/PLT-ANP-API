@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository;
 
@@ -11,9 +12,10 @@ using Repository;
 namespace PLT_ANP_API.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20240229124142_addedRefreshToken")]
+    partial class addedRefreshToken
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -140,7 +142,7 @@ namespace PLT_ANP_API.Migrations
                     b.Property<string>("RefreshToken")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                    b.Property<DateTime>("RefreshTokenExpiryTime")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("SecurityStamp")
@@ -268,15 +270,15 @@ namespace PLT_ANP_API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "ab8f2e83-abf9-467b-bceb-ffa5023a308c",
-                            ConcurrencyStamp = "dd01ce77-740b-4db2-9bdd-fd31d6a8e794",
+                            Id = "da375f68-fd3a-4d1f-a57c-876c66c1c7a5",
+                            ConcurrencyStamp = "3616c533-25f9-4d96-b559-d969d621f827",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "71a59e3a-ca26-4a5e-86cc-58a076543ba8",
-                            ConcurrencyStamp = "47b779de-98ec-488e-81f2-c416a7c04cab",
+                            Id = "74dcde51-864e-42ed-81df-c7488a1e088a",
+                            ConcurrencyStamp = "ac6cf064-de34-42d3-93dc-3e495ed18ebc",
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         });

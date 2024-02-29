@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Entities.Exceptions
 {
-    public class InvalidLicenseException: Exception
+    public class InvalidLicenseException: UnAuthorizedException
     {
         public InvalidLicenseException(string message): base(message)
         {

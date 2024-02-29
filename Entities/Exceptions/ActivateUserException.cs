@@ -7,7 +7,7 @@ using Utilities.Constants;
 
 namespace Entities.Exceptions
 {
-    public class ActivateUserException : Exception
+    public class ActivateUserException : UnauthorizedAccessException
     {
         public ActivateUserException() : base(Constants.UserNotActivated)
         {

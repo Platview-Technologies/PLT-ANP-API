@@ -52,7 +52,7 @@ namespace Service
             throw new NotImplementedException();
         }
 
-        public async Task<TokenDto> CreateToken(bool populateExp)
+        private protected async Task<TokenDto> CreateToken(bool populateExp)
         {
             // Get the signing credentials used to sign the token
             var signingCredentials = GetSigningCredentials();
@@ -82,12 +82,21 @@ namespace Service
             throw new NotImplementedException();
         }
 
-        public Task<TokenDto> RefreshToken(TokenDto tokenDto)
+        public async Task<TokenDto> RefreshToken(TokenDto tokenDto)
         {
-            throw new NotImplementedException();
+            var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
+
+            var user = await _userManager.FindByEmailAsync(principal.Identity.Name);
+            if (user == null || user.RefreshToken != tokenDto.RefreshToken ||
+                user.RefreshTokenExpiryTime <= DateTime.Now)
+                throw new RefreshTokenBadRequest();
+
+            _user = user;
+
+            return await CreateToken(populateExp: false);
         }
 
-        public async Task<IdentityResult> RegisterAdminUser(UserAdminRegistration userAdminRegistration)
+        public async Task<IdentityResult> RegisterAdminUser(UserAdminRegistrationDto userAdminRegistration)
         {
             ValidateLicense(userAdminRegistration.LicenseCode);
 
@@ -113,7 +122,7 @@ namespace Service
             return result;
         }
 
-        public async Task<bool> ValidateUser(UserForAuthenticationDto userForAuth)
+        public async Task<TokenDto> ValidateUser(UserForAuthenticationDto userForAuth)
         {
             _user = await _userManager.FindByEmailAsync(userForAuth.Email);
 
@@ -127,8 +136,8 @@ namespace Service
 
             if (!result)
                 throw new InvalidCredentialsException();
-            
-            return result;
+
+            return await CreateToken(populateExp: true);
         }
 
         private protected void ValidateLicense(string code)
@@ -200,6 +209,39 @@ namespace Service
                 return Convert.ToBase64String(randomNumber);
             }
         }
+        private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
+        {
 
+            // Set up token validation parameters
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.Secret))),
+                ValidateLifetime = false,
+                ValidIssuer = _jwtConfiguration.ValidIssuer,
+                ValidAudience = _jwtConfiguration.ValidAudience
+            };
+
+            // Create a new JwtSecurityTokenHandler
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            // Validate the token and retrieve the principal
+            SecurityToken securityToken;
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+
+            // Check if the token is a valid JwtSecurityToken
+            var jwtSecurityToken = securityToken as JwtSecurityToken;
+            if (jwtSecurityToken == null ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                // Throw an exception if the token is invalid
+                throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
+            }
+
+            // Return the principal extracted from the token
+            return principal;
+        }
     }
 }
