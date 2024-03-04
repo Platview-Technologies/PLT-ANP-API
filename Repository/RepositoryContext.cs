@@ -1,5 +1,5 @@
 ﻿using Entities.Models;
-using Entities.SytstemModel;
+using Entities.SystemModel;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Repository.Configuration;

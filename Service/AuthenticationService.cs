@@ -11,6 +11,7 @@ using Microsoft.IdentityModel.Tokens;
 using Service.Contract;
 using Shared.DTOs;
 using Shared.DTOs.Request;
+using Shared.DTOs.Response;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
@@ -153,7 +154,7 @@ namespace Service
         private static SigningCredentials GetSigningCredentials()
         {
             // Get the secret key from the environment variable
-            var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable("SECRET"));
+            var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.Secret));
 
             // Create a new symmetric security key using the secret key
             var secret = new SymmetricSecurityKey(key);
@@ -242,6 +243,36 @@ namespace Service
 
             // Return the principal extracted from the token
             return principal;
+        }
+
+        public UserRegTokenDto CreateUserRegCode(string email)
+        {
+            return new UserRegTokenDto()
+            {
+                regCode = GenerateNewUserJwtToken(email)
+            };
+        }
+
+        private string GenerateNewUserJwtToken(string userEmail)
+        {
+            var signingCredentials = GetSigningCredentials();
+            var claims = GetClaims(userEmail);
+            var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
+            var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+            // Write the token as a string
+            return accessToken;
+
+        }
+
+         private List<Claim> GetClaims(string email)
+        {
+            var claims = new List<Claim>
+            {
+                // Add the user's name as a claim
+                new Claim(ClaimTypes.Email, email)
+            };
+
+            return claims;
         }
     }
 }

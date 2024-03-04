@@ -1,4 +1,4 @@
-﻿using Entities.SytstemModel;
+﻿using Entities.SystemModel;
 using Entities.Validation;
 using System.ComponentModel.DataAnnotations;
 

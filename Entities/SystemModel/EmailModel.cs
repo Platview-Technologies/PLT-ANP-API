@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using Utilities.Enum;
 
-namespace Entities.SytstemModel
+namespace Entities.SystemModel
 {
     public class EmailModel : EntityBase<Guid>
     {
@@ -10,7 +10,6 @@ namespace Entities.SytstemModel
         {
 
         }
-
 
         [Column(TypeName = "nvarchar(max)")]
         public string? Message { get; set; }

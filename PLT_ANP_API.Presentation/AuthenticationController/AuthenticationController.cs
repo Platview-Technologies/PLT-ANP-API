@@ -5,6 +5,7 @@ using PLT_ANP_API.Presentation.ActionFilters;
 using Service.Contract;
 using Shared.DTOs.Request;
 using Shared.DTOs.Response;
+using System.Diagnostics.Contracts;
 using Utilities.Constants;
 
 namespace PLT_ANP_API.Presentation.AuthenticationController
@@ -49,5 +50,8 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
 
             return Ok(userResponse);
         }
+
+
+        
     }
 }

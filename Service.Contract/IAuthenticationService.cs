@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Shared.DTOs;
 using Shared.DTOs.Request;
+using Shared.DTOs.Response;
 
 namespace Service.Contract
 {
@@ -13,5 +14,6 @@ namespace Service.Contract
         Task<TokenDto> ValidateUser(UserForAuthenticationDto userForAuth);
         //Task<TokenDto> CreateToken(bool populateExp);
         Task<TokenDto> RefreshToken(TokenDto tokenDto);
+        UserRegTokenDto CreateUserRegCode(string email); 
     }
 }

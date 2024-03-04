@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Entities.SystemModel;
+using Microsoft.AspNetCore.Identity;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -21,6 +22,10 @@ namespace Entities.Models
         public bool IsDeleted { get; set; }
         public string? RefreshToken { get; set; }
         public DateTime? RefreshTokenExpiryTime { get; set; }
+        public ICollection<EmailModel> Emails { get; set; }
+        public string  NewUserActivationToken { get; set; }
+        public string? TempUserId { get; set; }
+        public TempUserModel? TempUser { get; set }
 
 
     }

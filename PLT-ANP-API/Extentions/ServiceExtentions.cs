@@ -60,6 +60,12 @@ namespace PLT_ANP_API.Extentions
                 opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
         }
 
+        public static void ConfigureEmailServices(this IServiceCollection services)
+        {
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+        }
+
         public static void ConfigureServiceManager(this IServiceCollection services) =>
             services.AddScoped<IServiceManager, ServiceManager>();
 
