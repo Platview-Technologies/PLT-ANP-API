@@ -48,5 +48,7 @@ namespace Utilities.Enum
             TagName.UserId
             )]
         AccountActivation,
+        [Display(Name = "User Registration Template", Description = Constants.Constants.ToPersonanized + TagName.FirstName + Constants.Constants.CommaSpace + TagName.RegCode + Constants.Constants.CommaSpace + TagName.UserId)]
+        UserRegistration,
     }
 }

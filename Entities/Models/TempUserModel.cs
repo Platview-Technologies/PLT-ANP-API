@@ -5,6 +5,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Utilities.Validation;
 
 namespace Entities.Models
 {
@@ -14,9 +15,10 @@ namespace Entities.Models
 
         [Required]
         [DataType(DataType.EmailAddress)]
+        [EmailValidation(ErrorMessage = "Invalid email address")]
         public string? Email { get; set; }
         public bool? IsActive { get; set; } = false;
-        public string? UserID { get; set; }
+        public string? UserId { get; set; }
         public UserModel? UserModel {get; set;}
     }
 }

@@ -12,5 +12,6 @@ namespace Contract
         void CreateTempUser(TempUserModel email);
         Task<IEnumerable<TempUserModel>> GetAllTempUser(bool trackChanges);
         Task<TempUserModel> GetTempUser(Guid Id, bool trackChanges);
+        Task<TempUserModel> GetTempUser(string email, bool trackChanges);
     }
 }

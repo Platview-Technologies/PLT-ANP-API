@@ -15,6 +15,25 @@ namespace Repository
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<EmailModel>()
+                .HasOne(c => c.Deals)
+                .WithMany(p => p.Emails)
+                .HasForeignKey(c => c.DealId);
+
+            modelBuilder.Entity<EmailModel>()
+                .HasOne(c => c.Owner)
+                .WithMany(p => p.Emails)
+                .HasForeignKey(c => c.UserId);
+
+            modelBuilder.Entity<TempUserModel>()
+                .HasOne(c => c.UserModel)
+                .WithOne(p => p.TempUser)
+                .HasForeignKey<TempUserModel>(c => c.UserId)
+                .IsRequired(false);
+
+
+
+
             //modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
             //modelBuilder.Entity<UserModel>()
@@ -22,5 +41,7 @@ namespace Repository
         }
         public DbSet<DealsModel> Deals { get; set; }
         public DbSet<EmailModel> EmailLogs { get; set; }
+        public DbSet<EmailTemplateModel> EmailTemplates { get; set; }
+        public DbSet<TempUserModel> TempUser { get; set; }
     }
 }   

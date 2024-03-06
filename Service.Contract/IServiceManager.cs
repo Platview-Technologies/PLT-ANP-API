@@ -10,5 +10,6 @@ namespace Service.Contract
     {
         IDealService DealService { get; }
         IAuthenticationService AuthenticationService { get; }
+        IUserManagementService UserManagementService { get; }
     }
 }

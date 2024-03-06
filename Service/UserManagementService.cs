@@ -4,12 +4,6 @@ using Contracts;
 using Entities.Exceptions;
 using Entities.Models;
 using Service.Contract;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata;
-using System.Text;
-using System.Threading.Tasks;
 using Utilities.Constants;
 
 namespace Service
@@ -23,7 +17,7 @@ namespace Service
             _logger = logger;
             _repository = repository;
         }
-        public void CreateTempUser(string email)
+        public Guid CreateTempUser(string email)
         {
             TempUserModel tempUser = new()
             {
@@ -31,6 +25,7 @@ namespace Service
             };
             _repository.TempUser.CreateTempUser(tempUser);
             _repository.Save();
+            return tempUser.Id;
         }
 
         public async void DeleteUser(Guid Id)
@@ -49,6 +44,7 @@ namespace Service
             var tempUser = await _repository.TempUser.GetTempUser(Id, trackChanges);
             if (tempUser == null)
             {
+                _logger.LogWarn(string.Format(ErrorMessage.ObjectNotFound, "User"));
                 throw new NotFoundException(string.Format(ErrorMessage.ObjectNotFound, "User"));
             }
             return tempUser;

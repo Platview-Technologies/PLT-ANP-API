@@ -15,16 +15,15 @@ namespace Service
     {
         private readonly IRepositoryManager _repository;
         private readonly UserManager<UserModel> _userManager;
-        private readonly EmailTemplateService _emailTemplate;
-        public EmailService(IRepositoryManager repository, UserManager<UserModel> userManager, EmailTemplateService emailTemplate)
+        private readonly IEmailTemplateService _emailTemplate;
+        public EmailService(IRepositoryManager repository, UserManager<UserModel> userManager, IEmailTemplateService emailTemplate)
         {
             _repository = repository;
             _userManager = userManager;
             _emailTemplate = emailTemplate;
 
-
         }
-        public async void CreateEmail(string message, string subject, string email)
+        public void CreateEmail(string message, string subject, string email)
         {
             EmailModel _email = new EmailModel()
             {
@@ -37,7 +36,20 @@ namespace Service
             _repository.Email.CreateEmailLog(_email);
             _repository.Save();
         }
-
+        public void CreateEmail<T>(string email, T userId, string token, EmailTypeEnums emailType)
+        {
+            EmailModel _email = new EmailModel()
+            {
+                Emailaddresses = email,
+                UpdatedDate = DateTime.Now,
+                Status = MessageStatusEnums.Pending,
+                EmailType = emailType,
+                NewUserActivationToken = token,
+                UserId = userId.ToString()
+            };
+            _repository.Email.CreateEmailLog(_email);
+            _repository.Save();
+        }
         //public async Task<List<EmailModel>> GetPendingEmails(int page, int pageSize)
         //{
         //    var pendingEmails = await FindByCondition(x => x.Status == MessageStatusEnums.Pending, true)
@@ -326,5 +338,7 @@ namespace Service
 
             return splittedEmails;
         }
+
+       
     }
 }

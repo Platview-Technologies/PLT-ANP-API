@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-
+using Utilities.Validation;
 
 namespace Shared.DTOs.Request
 {
@@ -7,5 +7,9 @@ namespace Shared.DTOs.Request
     {
         [Required(ErrorMessage = "License Code is Required")]
         public string LicenseCode { get; init; }
+        [Required(ErrorMessage = "Email is required")]
+        [DataType(DataType.EmailAddress)]
+        [EmailValidation(ErrorMessage = "Invalid email address")]
+        public string? Email { get; init; }
     }
 }

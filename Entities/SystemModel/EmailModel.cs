@@ -27,6 +27,7 @@ namespace Entities.SystemModel
         public string? NewUserActivationToken { get; set; }
         public string? UserId { get; set; }
         public UserModel? Owner { get; set; }
+        public Guid DealId { get; set; }
         public DealsModel? Deals { get; set; }
     }
 }

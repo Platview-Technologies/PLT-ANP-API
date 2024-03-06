@@ -9,7 +9,7 @@ namespace Service.Contract
 {
     public interface IUserManagementService
     {
-        void CreateTempUser(string email);
+        Guid CreateTempUser(string email);
         Task<IEnumerable<TempUserModel>> GetAllTempUser();
         void DeleteUser(Guid Id);
     }

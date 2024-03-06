@@ -1,5 +1,5 @@
 ﻿using Entities.SystemModel;
-using Entities.Validation;
+using Utilities.Validation;
 using System.ComponentModel.DataAnnotations;
 
 namespace Entities.Models

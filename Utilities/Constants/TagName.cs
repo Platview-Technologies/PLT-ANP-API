@@ -44,6 +44,7 @@ namespace Utilities.Constants
         public const string Month = "[[Month]]";
         public const string Year = "[[Year]]";
         public const string Solution = "[[Solution]]";
+        public const string RegCode = "[[RegCode]]";
 
     }
 }

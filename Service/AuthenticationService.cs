@@ -8,15 +8,18 @@ using Entities.SystemModel;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using MimeKit.Cryptography;
 using Service.Contract;
 using Shared.DTOs;
 using Shared.DTOs.Request;
 using Shared.DTOs.Response;
+using System.Data;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Utilities.Constants;
+using Utilities.Enum;
 
 namespace Service
 {
@@ -24,6 +27,7 @@ namespace Service
     {
         private readonly ILoggerManager _logger;
         private readonly IRepositoryManager _repository;
+        private readonly IEmailService _emailService;
         private readonly IMapper _mapper;
         private readonly UserManager<UserModel> _userManager;
         private readonly JwtConfiguration _jwtConfiguration;
@@ -36,7 +40,8 @@ namespace Service
             UserManager<UserModel> userManager,
             IOptions<JwtConfiguration> configuration,
             RoleManager<IdentityRole> roleManager,
-            IRepositoryManager repository)
+            IRepositoryManager repository, IEmailService emailService
+            )
         {
             _logger = logger;
             _repository = repository;
@@ -45,8 +50,10 @@ namespace Service
             _jwtConfiguration = configuration.Value;
             _roleManager = roleManager;
             _repository = repository;
+            _emailService = emailService;
 
-                
+
+
         }
         public Task<IdentityResult> ActivateAccount(AccountActivationByEmailDto accountActivation)
         {
@@ -119,6 +126,32 @@ namespace Service
                 // Add user to the roles and user join table
                 await _userManager.AddToRolesAsync(user, validRoles);
             }
+            _emailService.CreateEmail<string>(userAdminRegistration.Email, user.Id, code, EmailTypeEnums.AccountActivation);
+            _repository.Save();
+
+            return result;
+        }
+
+        public async Task<IdentityResult> RegisterNormalUser(NormalUserRegistrationDto normalUser)
+        {
+            ValidateNormalUser(normalUser.Token);
+
+            var user = _mapper.Map<UserModel>(normalUser);
+            var result = await _userManager.CreateAsync(user, normalUser.Password);
+
+            var roles = new List<string>() { "Staff" };
+
+            if (result.Succeeded)
+            {
+                // filter the roles that exist in the role manager
+                var validRoles = roles
+                  .Where(role => _roleManager.RoleExistsAsync(role).GetAwaiter().GetResult())
+                  .ToList();
+
+                // Add user to the roles and user join table
+                await _userManager.AddToRolesAsync(user, validRoles);
+            }
+            SyncTempUserAndUserAsync(normalUser.)
 
             return result;
         }
@@ -274,5 +307,62 @@ namespace Service
 
             return claims;
         }
+
+        private void ValidateNormalUser(string token)
+        {
+            var principal = GetPrincipalFromToken(token);
+            if (principal == null)
+            {
+                throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
+            }
+
+        }
+        private ClaimsPrincipal GetPrincipalFromToken(string token)
+        {
+
+            // Set up token validation parameters
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateAudience = true,
+                ValidateIssuer = true,
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.Secret))),
+                ValidateLifetime = true,
+                ValidIssuer = _jwtConfiguration.ValidIssuer,
+                ValidAudience = _jwtConfiguration.ValidAudience
+            };
+
+            // Create a new JwtSecurityTokenHandler
+            var tokenHandler = new JwtSecurityTokenHandler();
+
+            // Validate the token and retrieve the principal
+            SecurityToken securityToken;
+            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+
+            // Check if the token is a valid JwtSecurityToken
+            var jwtSecurityToken = securityToken as JwtSecurityToken;
+            if (jwtSecurityToken == null ||
+                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+            {
+                // Throw an exception if the token is invalid
+                throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
+            }
+            if (principal == null)
+            {
+                throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
+            }
+
+            // Return the principal extracted from the token
+            return principal;
+        }
+
+        private async Task SyncTempUserAndUserAsync(string email, UserModel user)
+        {
+            var tempUser = await _repository.TempUser.GetTempUser(email, true);
+            tempUser.UserId = user.Id;
+            tempUser.IsActive = true;
+            _repository.Save();
+        }
+
     }
 }

@@ -24,8 +24,8 @@ namespace Entities.Models
         public DateTime? RefreshTokenExpiryTime { get; set; }
         public ICollection<EmailModel> Emails { get; set; }
         public string  NewUserActivationToken { get; set; }
-        public string? TempUserId { get; set; }
-        public TempUserModel? TempUser { get; set }
+        public Guid? TempUserId { get; set; }
+        public TempUserModel? TempUser { get; set; }
 
 
     }

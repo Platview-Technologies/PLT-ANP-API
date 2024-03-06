@@ -15,16 +15,18 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
     public class AuthenticationController: ControllerBase
     {
         private readonly IServiceManager _service;
+        private readonly IEmailService _emailService;
 
-        public AuthenticationController(IServiceManager service)
+        public AuthenticationController(IServiceManager service, IEmailService emailService)
         {
             _service = service;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
-        [ServiceFilter(typeof(ValidationFilterAttribute))]
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status400BadRequest)]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> RegisterUser([FromBody] UserAdminRegistrationDto userAdmin)
         {
             var result = await _service.AuthenticationService.RegisterAdminUser(userAdmin);
@@ -36,6 +38,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
                 }
                 return BadRequest(ModelState);
             }
+            
             NewUserDto _ = new() { message = Constants.NewAccountMessage };
             return Ok(_);
         }
