@@ -9,6 +9,7 @@ namespace Service.Contract
     public interface IAuthenticationService
     {
         Task<IdentityResult> RegisterAdminUser(UserAdminRegistrationDto userAdminRegistration);
+        Task<IdentityResult> RegisterNormalUser(NormalUserRegistrationDto normalUser);
         Task<string> GetEmailConfirmationToken(UserModel user);
         Task<IdentityResult> ActivateAccount(AccountActivationByEmailDto accountActivation);
         Task<TokenDto> ValidateUser(UserForAuthenticationDto userForAuth);

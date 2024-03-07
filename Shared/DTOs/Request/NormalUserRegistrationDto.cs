@@ -9,5 +9,6 @@ namespace Shared.DTOs.Request
     public record NormalUserRegistrationDto : UserRegistrationDto
     {
         public string Token { get; set; }
+        public Guid TempId { get; set; }
     }
 }

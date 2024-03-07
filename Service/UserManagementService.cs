@@ -30,7 +30,7 @@ namespace Service
 
         public async void DeleteUser(Guid Id)
         {
-            var tempUser = await TempUserExist(Id, true);
+            var tempUser = await GetTempUser(Id, true);
             tempUser.ToDeletedEntity();
             _repository.Save();
         }
@@ -39,7 +39,7 @@ namespace Service
         {
             return await _repository.TempUser.GetAllTempUser(false);
         }
-        private protected async Task<TempUserModel> TempUserExist(Guid Id, bool trackChanges)
+        public  async Task<TempUserModel> GetTempUser(Guid Id, bool trackChanges)
         {
             var tempUser = await _repository.TempUser.GetTempUser(Id, trackChanges);
             if (tempUser == null)

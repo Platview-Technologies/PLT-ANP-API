@@ -134,9 +134,10 @@ namespace Service
 
         public async Task<IdentityResult> RegisterNormalUser(NormalUserRegistrationDto normalUser)
         {
-            ValidateNormalUser(normalUser.Token);
+            var email = ValidateNormalUser(normalUser.Token);
 
             var user = _mapper.Map<UserModel>(normalUser);
+            user.Email = email;
             var result = await _userManager.CreateAsync(user, normalUser.Password);
 
             var roles = new List<string>() { "Staff" };
@@ -150,9 +151,9 @@ namespace Service
 
                 // Add user to the roles and user join table
                 await _userManager.AddToRolesAsync(user, validRoles);
+                _emailService.CreateEmail(user.Email, user.Id, null,emailType:EmailTypeEnums.NewAccount);
             }
-            SyncTempUserAndUserAsync(normalUser.)
-
+            await SyncTempUserAndUserAsync(email, user);
             return result;
         }
 
@@ -297,7 +298,7 @@ namespace Service
 
         }
 
-         private List<Claim> GetClaims(string email)
+         private static List<Claim> GetClaims(string email)
         {
             var claims = new List<Claim>
             {
@@ -308,16 +309,17 @@ namespace Service
             return claims;
         }
 
-        private void ValidateNormalUser(string token)
+        private string ValidateNormalUser(string token)
         {
-            var principal = GetPrincipalFromToken(token);
-            if (principal == null)
+            var principalAndEmail = GetPrincipalFromToken(token);
+            if (principalAndEmail.Item1 == null || principalAndEmail.Item2 == null)
             {
                 throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
             }
+            return principalAndEmail.Item2;
 
         }
-        private ClaimsPrincipal GetPrincipalFromToken(string token)
+        private Tuple<ClaimsPrincipal, string> GetPrincipalFromToken(string token)
         {
 
             // Set up token validation parameters
@@ -338,9 +340,17 @@ namespace Service
             // Validate the token and retrieve the principal
             SecurityToken securityToken;
             var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            var jwtSecurityTokenUE = tokenHandler.ReadJwtToken(token);
+            var claims = jwtSecurityTokenUE.Claims;
+            var emailClaim = claims.FirstOrDefault(c => c.Type == "email");
+            if (emailClaim == null)
+            {
+                throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token)); 
+            }
 
             // Check if the token is a valid JwtSecurityToken
             var jwtSecurityToken = securityToken as JwtSecurityToken;
+            
             if (jwtSecurityToken == null ||
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -353,12 +363,17 @@ namespace Service
             }
 
             // Return the principal extracted from the token
-            return principal;
+            return Tuple.Create(principal, emailClaim.Value);
         }
 
         private async Task SyncTempUserAndUserAsync(string email, UserModel user)
         {
             var tempUser = await _repository.TempUser.GetTempUser(email, true);
+            if (tempUser == null)
+            {
+                _logger.LogWarn(string.Format(ErrorMessage.ObjectNotFound, "User"));
+                throw new NotFoundException(string.Format(ErrorMessage.ObjectNotFound, "User"));
+            }
             tempUser.UserId = user.Id;
             tempUser.IsActive = true;
             _repository.Save();

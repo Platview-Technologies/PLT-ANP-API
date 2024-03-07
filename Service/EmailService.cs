@@ -36,7 +36,7 @@ namespace Service
             _repository.Email.CreateEmailLog(_email);
             _repository.Save();
         }
-        public void CreateEmail<T>(string email, T userId, string token, EmailTypeEnums emailType)
+        public void CreateEmail<T>(string email, T userId, string? token, EmailTypeEnums emailType)
         {
             EmailModel _email = new EmailModel()
             {

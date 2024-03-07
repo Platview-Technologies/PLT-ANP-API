@@ -10,6 +10,6 @@ namespace Shared.DTOs.Request
         [Required(ErrorMessage = "Email is required")]
         [DataType(DataType.EmailAddress)]
         [EmailValidation(ErrorMessage = "Invalid email address")]
-        public string? Email { get; init; }
+        public string Email { get; init; }
     }
 }

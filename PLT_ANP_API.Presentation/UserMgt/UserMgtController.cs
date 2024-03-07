@@ -31,7 +31,6 @@ namespace PLT_ANP_API.Presentation.UserMgt
             Guid TempUserId = _service.UserManagementService.CreateTempUser(emailUser.Email);
             var Token = _service.AuthenticationService.CreateUserRegCode(emailUser.Email);
             _emailService.CreateEmail(email: emailUser.Email, userId: TempUserId, token: Token.regCode, emailType: EmailTypeEnums.UserRegistration);
-            // remember to do this in the userMangement Services
             return Ok();
         }
 
@@ -47,9 +46,10 @@ namespace PLT_ANP_API.Presentation.UserMgt
 
         [HttpDelete("{Id:Guid}")]
         [ProducesResponseType(204)]
-        public async Task<IActionResult> DeleteUser(Guid id)
+        [Authorize("Admin")]
+        public async Task<IActionResult> DeleteUser(Guid Id)
         {
-            _service.UserManagementService.DeleteUser(id);
+            _service.UserManagementService.DeleteUser(Id);
             return NoContent();
         }
 
