@@ -6,7 +6,7 @@
       "launchUrl": "swagger",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-        "SECRETKEY": "yflg78gyi2wuy7862igyfco87g2yi7f2if792gifu2p",
+        "SECRETKEY": "4A5D7F2C81E39A5BDEA5CDBB3E15499AB82F7DDE2F0A8C5D2D3F6A9C2B5E8A1F",
         "FromEmail": "godmancodes@gmail.com",
         "FromEmailPassword": "myjbcexqqroyoxmx"
       },

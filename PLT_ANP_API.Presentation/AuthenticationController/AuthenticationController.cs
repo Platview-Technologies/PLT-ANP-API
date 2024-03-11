@@ -13,12 +13,10 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
     public class AuthenticationController: ControllerBase
     {
         private readonly IServiceManager _service;
-        private readonly IEmailService _emailService;
 
         public AuthenticationController(IServiceManager service, IEmailService emailService)
         {
             _service = service;
-            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -36,6 +34,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
                 }
                 return BadRequest(ModelState);
             }
+            
             
             NewUserDto _ = new() { message = Constants.NewAccountMessage };
             return Ok(_);

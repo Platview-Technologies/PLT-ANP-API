@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository;
 
@@ -11,9 +12,10 @@ using Repository;
 namespace PLT_ANP_API.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20240308132555_fixedBugRemovedPropertyfromusermodel02")]
+    partial class fixedBugRemovedPropertyfromusermodel02
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -264,17 +266,12 @@ namespace PLT_ANP_API.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserModelId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("UserId");
-
-                    b.HasIndex("UserModelId");
 
                     b.ToTable("EmailLogs");
                 });
@@ -460,13 +457,9 @@ namespace PLT_ANP_API.Migrations
 
             modelBuilder.Entity("Entities.SystemModel.EmailModel", b =>
                 {
-                    b.HasOne("Entities.Models.TempUserModel", "Owner")
+                    b.HasOne("Entities.Models.UserModel", "Owner")
                         .WithMany("Emails")
                         .HasForeignKey("UserId");
-
-                    b.HasOne("Entities.Models.UserModel", null)
-                        .WithMany("Emails")
-                        .HasForeignKey("UserModelId");
 
                     b.Navigation("Owner");
                 });
@@ -520,11 +513,6 @@ namespace PLT_ANP_API.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Entities.Models.TempUserModel", b =>
-                {
-                    b.Navigation("Emails");
                 });
 
             modelBuilder.Entity("Entities.Models.UserModel", b =>

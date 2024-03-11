@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Repository;
 
@@ -11,9 +12,10 @@ using Repository;
 namespace PLT_ANP_API.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    partial class RepositoryContextModelSnapshot : ModelSnapshot
+    [Migration("20240308131007_fixedBugRemovedPropertyfromusermodel")]
+    partial class fixedBugRemovedPropertyfromusermodel
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -224,6 +226,9 @@ namespace PLT_ANP_API.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("DealId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int?>("EmailType")
                         .HasColumnType("int");
 
@@ -264,17 +269,14 @@ namespace PLT_ANP_API.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid?>("UserId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("UserModelId")
+                    b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("DealId");
 
-                    b.HasIndex("UserModelId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("EmailLogs");
                 });
@@ -460,13 +462,17 @@ namespace PLT_ANP_API.Migrations
 
             modelBuilder.Entity("Entities.SystemModel.EmailModel", b =>
                 {
-                    b.HasOne("Entities.Models.TempUserModel", "Owner")
+                    b.HasOne("Entities.Models.DealsModel", "Deals")
+                        .WithMany("Emails")
+                        .HasForeignKey("DealId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Entities.Models.UserModel", "Owner")
                         .WithMany("Emails")
                         .HasForeignKey("UserId");
 
-                    b.HasOne("Entities.Models.UserModel", null)
-                        .WithMany("Emails")
-                        .HasForeignKey("UserModelId");
+                    b.Navigation("Deals");
 
                     b.Navigation("Owner");
                 });
@@ -522,7 +528,7 @@ namespace PLT_ANP_API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Entities.Models.TempUserModel", b =>
+            modelBuilder.Entity("Entities.Models.DealsModel", b =>
                 {
                     b.Navigation("Emails");
                 });

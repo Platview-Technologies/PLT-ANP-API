@@ -10,6 +10,7 @@ namespace PLT_ANP_API.Presentation.UserMgt
 {
     [ApiController]
     [Route("api/usermgt")]
+    [Authorize(Roles = "Admin")]
     public class UserMgtController : ControllerBase
     {
         private readonly IServiceManager _service;
@@ -25,19 +26,17 @@ namespace PLT_ANP_API.Presentation.UserMgt
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status400BadRequest)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-        [Authorize("Admin")]
         public async Task<IActionResult> AddNewUser([FromBody] NewUserAddDto emailUser)
         {
             Guid TempUserId = _service.UserManagementService.CreateTempUser(emailUser.Email);
             var Token = _service.AuthenticationService.CreateUserRegCode(emailUser.Email);
-            _emailService.CreateEmail(email: emailUser.Email, userId: TempUserId, token: Token.regCode, emailType: EmailTypeEnums.UserRegistration);
+            _emailService.CreateEmail(email: emailUser.Email, tempUserId: TempUserId, token: Token.regCode, emailType: EmailTypeEnums.UserRegistration);
             return Ok();
         }
 
         [HttpGet()]
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status400BadRequest)]
-        [Authorize("Admin")]
         public async Task<IActionResult> GetAllUsersAsync()
         {
             var users = await _service.UserManagementService.GetAllTempUser();
@@ -46,7 +45,6 @@ namespace PLT_ANP_API.Presentation.UserMgt
 
         [HttpDelete("{Id:Guid}")]
         [ProducesResponseType(204)]
-        [Authorize("Admin")]
         public async Task<IActionResult> DeleteUser(Guid Id)
         {
             _service.UserManagementService.DeleteUser(Id);

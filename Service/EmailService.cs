@@ -36,7 +36,7 @@ namespace Service
             _repository.Email.CreateEmailLog(_email);
             _repository.Save();
         }
-        public void CreateEmail<T>(string email, T userId, string? token, EmailTypeEnums emailType)
+        public void CreateEmail(string email, Guid? userId, string? token, EmailTypeEnums emailType)
         {
             EmailModel _email = new EmailModel()
             {
@@ -45,7 +45,7 @@ namespace Service
                 Status = MessageStatusEnums.Pending,
                 EmailType = emailType,
                 NewUserActivationToken = token,
-                UserId = userId.ToString()
+                UserId = userId
             };
             _repository.Email.CreateEmailLog(_email);
             _repository.Save();
@@ -215,7 +215,9 @@ namespace Service
         private async Task<EmailContent> GetUserSubjectAndMessage(EmailModel email)
         {
 
-            var user = await _userManager.FindByEmailAsync(email.UserId);
+            var Tempuser = await _repository.TempUser.GetTempUser(email.UserId, false);
+            var user = Tempuser.UserModel;
+
 
             if (user == null)
             {
@@ -231,14 +233,14 @@ namespace Service
                 .Replace(TagName.Surname, user.LastName)
                 .Replace(TagName.EmailAddress, user.Email)
                 .Replace(TagName.ActivationToken, string.IsNullOrEmpty(email.NewUserActivationToken) ? "" : email.NewUserActivationToken)
-                .Replace(TagName.UserId, string.IsNullOrEmpty(email.UserId) ? "" : email.UserId);
+                .Replace(TagName.UserId, email.UserId.ToString());
 
             string subject = template.Subject
                 .Replace(TagName.FirstName, user.FirstName)
                 .Replace(TagName.Surname, user.LastName)
                 .Replace(TagName.EmailAddress, user.Email)
                 .Replace(TagName.PhoneNumber, user.PhoneNumber)
-                .Replace(TagName.UserId, user.Id);
+                .Replace(TagName.UserId, email.UserId.ToString());
 
             return new EmailContent()
             {
@@ -247,30 +249,30 @@ namespace Service
             };
         }
 
-        private async Task UserEmail(string userId, EmailTypeEnums emailType)
-        {
-            var user = await _userManager.FindByEmailAsync(userId);
+        //private async Task UserEmail(string userId, EmailTypeEnums emailType)
+        //{
+        //    var user = await _userManager.FindByEmailAsync(userId);
+        //    var tempUser = await
+        //    if (user == null)
+        //    {
+        //        return;
+        //    }
 
-            if (user == null)
-            {
-                return;
-            }
+        //    EmailModel email = new EmailModel()
+        //    {
+        //        Emailaddresses = user.Email,
+        //        EmailType = emailType,
+        //        Status = MessageStatusEnums.Pending,
+        //        UserId = ((emailType == EmailTypeEnums.NewAccount ||
+        //        emailType == EmailTypeEnums.AccountActivation) ? (userId) : (null)),
+        //        ChangeOrResetUserId = ((emailType == EmailTypeEnums.NewAccount) ?
+        //        (null) : (userId)),
+        //        Id = Guid.NewGuid()
+        //    };
 
-            EmailModel email = new EmailModel()
-            {
-                Emailaddresses = user.Email,
-                EmailType = emailType,
-                Status = MessageStatusEnums.Pending,
-                UserId = ((emailType == EmailTypeEnums.NewAccount ||
-                emailType == EmailTypeEnums.AccountActivation) ? (userId) : (null)),
-                ChangeOrResetUserId = ((emailType == EmailTypeEnums.NewAccount) ?
-                (null) : (userId)),
-                Id = Guid.NewGuid()
-            };
-
-            _repository.Email.CreateEmailLog(email);
-            _repository.Save();
-        }
+        //    _repository.Email.CreateEmailLog(email);
+        //    _repository.Save();
+        //}
 
         private async Task<string> AppendHeaderAndFooterToEmail(string message)
         {

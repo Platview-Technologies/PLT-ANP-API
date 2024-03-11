@@ -11,6 +11,7 @@ using Entities.ConfigurationModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using Utilities.Constants;
 
 namespace PLT_ANP_API.Extentions
 {
@@ -98,7 +99,7 @@ namespace PLT_ANP_API.Extentions
             var jwtConfiguration = new JwtConfiguration();
             configuration.Bind(jwtConfiguration.Section, jwtConfiguration);
 
-            var secretKey = Environment.GetEnvironmentVariable("SECRET");
+            var secretKey = Environment.GetEnvironmentVariable(Constants.SecretKey);
 
             services.AddAuthentication(opt =>
             {

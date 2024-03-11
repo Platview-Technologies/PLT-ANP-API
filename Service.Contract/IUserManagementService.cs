@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using Shared.DTOs.Response;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Service.Contract
     public interface IUserManagementService
     {
         Guid CreateTempUser(string email);
-        Task<IEnumerable<TempUserModel>> GetAllTempUser();
+        Task<IEnumerable<UserToReturnDto>> GetAllTempUser();
         void DeleteUser(Guid Id);
         Task<TempUserModel> GetTempUser(Guid Id, bool trackChanges);
     }

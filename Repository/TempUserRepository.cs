@@ -26,14 +26,14 @@ namespace Repository
             return await FindAll(trackChanges).OrderBy(x => x.CreatedDate).ToListAsync();
         }
 
-        public async Task<TempUserModel> GetTempUser(Guid Id, bool trackChanges)
+        public async Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges)
         {
-            return await FindByCondition(x => x.Id == Id, trackChanges).FirstAsync();
+            return await FindByCondition(x => x.Id == Id, trackChanges).Include(x => x.UserModel).FirstAsync();
         }
 
         public async Task<TempUserModel> GetTempUser(string email, bool trackChanges)
         {
-            return await FindByCondition(x => x.Email == email, trackChanges).FirstAsync();
+            return await FindByCondition(x => x.Email == email, trackChanges).SingleOrDefaultAsync();
         }
     }
 }

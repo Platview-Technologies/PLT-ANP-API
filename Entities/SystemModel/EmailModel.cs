@@ -25,9 +25,7 @@ namespace Entities.SystemModel
         public string? ResponseMessage { get; set; }
         public string? ChangeOrResetUserId { get; set; }
         public string? NewUserActivationToken { get; set; }
-        public string? UserId { get; set; }
-        public UserModel? Owner { get; set; }
-        public Guid DealId { get; set; }
-        public DealsModel? Deals { get; set; }
+        public Guid? UserId { get; set; }
+        public TempUserModel? Owner { get; set; }
     }
 }

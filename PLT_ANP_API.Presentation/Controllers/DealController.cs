@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using PLT_ANP_API.Presentation.ActionFilters;
 using Service.Contract;
 using Shared.DTOs.Request;
@@ -8,6 +9,7 @@ namespace PLT_ANP_API.Presentation.Controllers
 {
     [Route("api/deals")]
     [ApiController]
+    [Authorize]
     public class DealController : ControllerBase
     {
         private readonly IServiceManager _service;

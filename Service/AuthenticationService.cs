@@ -109,7 +109,6 @@ namespace Service
             ValidateLicense(userAdminRegistration.LicenseCode);
 
             var user = _mapper.Map<UserModel>(userAdminRegistration);
-            var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
             // email confirmation create
 
             var result = await _userManager.CreateAsync(user, userAdminRegistration.Password);
@@ -122,12 +121,12 @@ namespace Service
                 var validRoles = roles
                   .Where(role => _roleManager.RoleExistsAsync(role).GetAwaiter().GetResult())
                   .ToList();
-
+                Guid TemUser = await TaskSyncTempAndAdminUser(user.Email, user);
+                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 // Add user to the roles and user join table
                 await _userManager.AddToRolesAsync(user, validRoles);
+                _emailService.CreateEmail(userAdminRegistration.Email, TemUser, code, EmailTypeEnums.AccountActivation);
             }
-            _emailService.CreateEmail<string>(userAdminRegistration.Email, user.Id, code, EmailTypeEnums.AccountActivation);
-            _repository.Save();
 
             return result;
         }
@@ -148,10 +147,10 @@ namespace Service
                 var validRoles = roles
                   .Where(role => _roleManager.RoleExistsAsync(role).GetAwaiter().GetResult())
                   .ToList();
-
+                var tempUser = await _repository.TempUser.GetTempUser(email, false);
                 // Add user to the roles and user join table
                 await _userManager.AddToRolesAsync(user, validRoles);
-                _emailService.CreateEmail(user.Email, user.Id, null,emailType:EmailTypeEnums.NewAccount);
+                _emailService.CreateEmail(user.Email, tempUser.Id, null,emailType:EmailTypeEnums.NewAccount);
             }
             await SyncTempUserAndUserAsync(email, user);
             return result;
@@ -188,7 +187,7 @@ namespace Service
         private static SigningCredentials GetSigningCredentials()
         {
             // Get the secret key from the environment variable
-            var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.Secret));
+            var key = Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.SecretKey));
 
             // Create a new symmetric security key using the secret key
             var secret = new SymmetricSecurityKey(key);
@@ -378,6 +377,23 @@ namespace Service
             tempUser.IsActive = true;
             _repository.Save();
         }
-
+        private async Task<Guid> TaskSyncTempAndAdminUser(string email, UserModel user)
+        {
+            var tempUser = await _repository.TempUser.GetTempUser(email, true);
+            if (tempUser != null)
+            {
+                _logger.LogWarn("user already exists");
+                
+            }
+            var _tempUser = new TempUserModel()
+            {
+                Email = email,
+                IsActive = true,
+                UserId = user.Id
+            };
+            _repository.TempUser.CreateTempUser(_tempUser);
+            _repository.Save();
+            return _tempUser.Id;
+        }
     }
 }

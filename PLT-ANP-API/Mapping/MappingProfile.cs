@@ -13,6 +13,7 @@ namespace PLT_ANP_API.Mapping
             CreateMap<DealUpdateDto, DealsModel>();
             CreateMap<DealsModel, DealResponseDto>();
             CreateMap<UserAdminRegistrationDto, UserModel>();
+            CreateMap<TempUserModel, UserToReturnDto>();
         }
     }
 }

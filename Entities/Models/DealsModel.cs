@@ -30,6 +30,5 @@ namespace Entities.Models
         [Required(ErrorMessage = "Renewal Date for Deal is Required")]
         [DataType(DataType.DateTime)]
         public DateTime RenewalDate { get; set; }
-        public ICollection<EmailModel> Emails { get; set; }
     }
 }

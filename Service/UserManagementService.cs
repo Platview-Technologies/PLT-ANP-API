@@ -4,6 +4,7 @@ using Contracts;
 using Entities.Exceptions;
 using Entities.Models;
 using Service.Contract;
+using Shared.DTOs.Response;
 using Utilities.Constants;
 
 namespace Service
@@ -12,10 +13,13 @@ namespace Service
     {
         private readonly ILoggerManager _logger;
         private readonly IRepositoryManager _repository;
-        public UserManagementService(ILoggerManager logger, IRepositoryManager repository)
+        private readonly IMapper _mapper;
+
+        public UserManagementService(ILoggerManager logger, IRepositoryManager repository, IMapper mapper)
         {
             _logger = logger;
             _repository = repository;
+            _mapper = mapper;
         }
         public Guid CreateTempUser(string email)
         {
@@ -35,9 +39,10 @@ namespace Service
             _repository.Save();
         }
 
-        public async Task<IEnumerable<TempUserModel>> GetAllTempUser()
+        public async Task<IEnumerable<UserToReturnDto>> GetAllTempUser()
         {
-            return await _repository.TempUser.GetAllTempUser(false);
+            var users = _mapper.Map<IEnumerable<UserToReturnDto>>(await _repository.TempUser.GetAllTempUser(false));
+            return users;
         }
         public  async Task<TempUserModel> GetTempUser(Guid Id, bool trackChanges)
         {

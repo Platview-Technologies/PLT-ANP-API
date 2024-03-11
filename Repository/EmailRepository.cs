@@ -27,19 +27,19 @@ namespace Repository
                                     .Take((page + 1) * pageSize)
                                      .ToListAsync();
         }
-        public void GetEmailUser(EmailModel email)
-        {
-            var user = FindByCondition(x => x.Id == email.Id, false).Select(x => new EmailUserResponseDto()
-            {
-                Email = x.Owner.Email,
-                FirstName = x.Owner.FirstName,
-                LastName = x.Owner.LastName,
-                EmailConfirmed = x.Owner.EmailConfirmed,
-                Id = x.Owner.Id,
-                NewUserActivationToken = x.Owner.NewUserActivationToken,
-                PhoneNumber = x.Owner.PhoneNumber
-            });
-        }
+        //public void GetEmailUser(EmailModel email)
+        //{
+        //    var user = FindByCondition(x => x.Id == email.Id, false).Select(x => new EmailUserResponseDto()
+        //    {
+        //        Email = x.Owner.Email,
+        //        FirstName = x.Owner.FirstName,
+        //        LastName = x.Owner.LastName,
+        //        EmailConfirmed = x.Owner.EmailConfirmed,
+        //        Id = x.Owner.Id,
+        //        //NewUserActivationToken = x.Owner.NewUserActivationToken,
+        //        PhoneNumber = x.Owner.PhoneNumber
+        //    });
+        //}
 
     }
 }

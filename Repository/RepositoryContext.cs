@@ -16,11 +16,6 @@ namespace Repository
         {
             base.OnModelCreating(modelBuilder);
             modelBuilder.Entity<EmailModel>()
-                .HasOne(c => c.Deals)
-                .WithMany(p => p.Emails)
-                .HasForeignKey(c => c.DealId);
-
-            modelBuilder.Entity<EmailModel>()
                 .HasOne(c => c.Owner)
                 .WithMany(p => p.Emails)
                 .HasForeignKey(c => c.UserId);
