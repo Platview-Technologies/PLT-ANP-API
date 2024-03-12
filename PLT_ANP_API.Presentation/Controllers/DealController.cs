@@ -44,7 +44,7 @@ namespace PLT_ANP_API.Presentation.Controllers
         public async Task<IActionResult> CreateDeal([FromBody] DealRequestDto deal)
         {
             var createdDeal = await _service.DealService.CreateDeal(deal, false);
-            return CreatedAtRoute("GetDealById", new { Id = createdDeal.Id }, createdDeal);
+            return CreatedAtRoute("GetDealById", new { id = createdDeal.Id }, createdDeal);
         }
 
         [HttpPut("{Id:Guid}")]

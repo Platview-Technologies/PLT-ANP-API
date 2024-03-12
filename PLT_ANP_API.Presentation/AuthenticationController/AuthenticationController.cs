@@ -56,7 +56,6 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> RegisterNormalUser(NormalUserRegistrationDto normalUser)
         {
-            await _service.UserManagementService.GetTempUser(normalUser.TempId, false);
             var result = await _service.AuthenticationService.RegisterNormalUser(normalUser);
             if (!result.Succeeded)
             {
@@ -67,7 +66,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
                 return BadRequest(ModelState);
             }
             
-            NewUserDto _ = new() { message = Constants.NewAccountMessage };
+            NewUserDto _ = new() { message = Constants.NewAccountNormalUser };
             return Ok(_);
 
         }

@@ -70,6 +70,7 @@ namespace Utilities.Constants
         public const string AccountActivationErrorMessage = "Account activation unsuccessfull";
         public const string AccountActivationMessage = "Account activation successfull";
         public const string NewAccountMessage = "Activation mail sent please activate account before next login";
+        public const string NewAccountNormalUser = "Account Created Successfully";
 
         public const string ToPersonanized = "To Personanized this template, Use the following \n ";
         public const string WebRootPath = "WebRootPath";
@@ -80,5 +81,6 @@ namespace Utilities.Constants
         public const string EntrustConnectionError = "Unable to connect to Entrust";
         public const string EntrustBlockedUser = "This User is blocked by entrust";
         public const string EntrustWrongGroup = "User does not not belong to this application";
+
     }
 }

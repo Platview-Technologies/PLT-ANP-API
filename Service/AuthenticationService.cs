@@ -134,6 +134,12 @@ namespace Service
         public async Task<IdentityResult> RegisterNormalUser(NormalUserRegistrationDto normalUser)
         {
             var email = ValidateNormalUser(normalUser.Token);
+            var tempUser = await _repository.TempUser.GetTempUser(email, false);
+            if (tempUser == null)
+            {
+                _logger.LogWarn(string.Format(ErrorMessage.ObjectNotFound, "User"));
+                throw new InvalidUserException();
+            }
 
             var user = _mapper.Map<UserModel>(normalUser);
             user.Email = email;
@@ -147,12 +153,11 @@ namespace Service
                 var validRoles = roles
                   .Where(role => _roleManager.RoleExistsAsync(role).GetAwaiter().GetResult())
                   .ToList();
-                var tempUser = await _repository.TempUser.GetTempUser(email, false);
                 // Add user to the roles and user join table
                 await _userManager.AddToRolesAsync(user, validRoles);
                 _emailService.CreateEmail(user.Email, tempUser.Id, null,emailType:EmailTypeEnums.NewAccount);
+                await SyncTempUserAndUserAsync(email, user);
             }
-            await SyncTempUserAndUserAsync(email, user);
             return result;
         }
 
@@ -327,7 +332,7 @@ namespace Service
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.Secret))),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.SecretKey))),
                 ValidateLifetime = true,
                 ValidIssuer = _jwtConfiguration.ValidIssuer,
                 ValidAudience = _jwtConfiguration.ValidAudience
@@ -338,14 +343,26 @@ namespace Service
 
             // Validate the token and retrieve the principal
             SecurityToken securityToken;
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            ClaimsPrincipal? principal;
+            try
+            {
+                principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogInfo($"token expired");
+                throw new ExpiredToken();
+
+            }
             var jwtSecurityTokenUE = tokenHandler.ReadJwtToken(token);
             var claims = jwtSecurityTokenUE.Claims;
-            var emailClaim = claims.FirstOrDefault(c => c.Type == "email");
+            var emailClaim = claims.First();
+
             if (emailClaim == null)
             {
                 throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token)); 
             }
+            
 
             // Check if the token is a valid JwtSecurityToken
             var jwtSecurityToken = securityToken as JwtSecurityToken;
