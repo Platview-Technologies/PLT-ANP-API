@@ -363,3 +363,7 @@ MigrationBackup/
 FodyWeavers.xsd
 /PLT-ANP-API/appsettings.Development.json
 /PLT-ANP-API/appsettings.json
+/PLT-ANP-API/Migrations/20240318090644_initialDbCreation.cs
+/PLT-ANP-API/Migrations/20240318102953_implementedCascadeOnEmailandUser.cs
+/PLT-ANP-API/Migrations/20240318103458_implementedCascadeOnEmailandUser2.cs
+/PLT-ANP-API/Migrations/RepositoryContextModelSnapshot.cs
