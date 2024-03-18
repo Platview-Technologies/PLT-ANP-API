@@ -5,6 +5,8 @@ using PLT_ANP_API.Presentation.ActionFilters;
 using Contracts;
 using Microsoft.AspNetCore.Mvc;
 using PLT_ANP_API.Presentation;
+using Utilities;
+using Utilities.Constants;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,7 +35,8 @@ builder.Services.ConfigureIdentity();
 builder.Services.ConfigureJWT(builder.Configuration);
 // IOptions
 builder.Services.AddJwtConfiguration(builder.Configuration);
-
+builder.Services.AddSMTPConfigurations(builder.Configuration);
+builder.Services.ConfigureHosting();
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.SuppressModelStateInvalidFilter = true;
@@ -45,7 +48,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
-
+AppDomain.CurrentDomain.SetData(Constants.WebRootPath, app.Environment.WebRootPath);
 app.UseCors("CorsPolicy");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

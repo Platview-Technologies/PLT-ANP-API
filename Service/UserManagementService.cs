@@ -3,6 +3,7 @@ using Contract;
 using Contracts;
 using Entities.Exceptions;
 using Entities.Models;
+using Microsoft.AspNetCore.Identity;
 using Service.Contract;
 using Shared.DTOs.Response;
 using Utilities.Constants;
@@ -14,12 +15,14 @@ namespace Service
         private readonly ILoggerManager _logger;
         private readonly IRepositoryManager _repository;
         private readonly IMapper _mapper;
+        private readonly UserManager<UserModel> _userManager;
 
-        public UserManagementService(ILoggerManager logger, IRepositoryManager repository, IMapper mapper)
+        public UserManagementService(ILoggerManager logger, IRepositoryManager repository, IMapper mapper, UserManager<UserModel> userManager)
         {
             _logger = logger;
             _repository = repository;
             _mapper = mapper;
+            _userManager = userManager;
         }
         public Guid CreateTempUser(string email)
         {
@@ -32,10 +35,15 @@ namespace Service
             return tempUser.Id;
         }
 
-        public async void DeleteUser(Guid Id)
+        public async Task DeleteUser(Guid Id)
         {
-            var tempUser = await GetTempUser(Id, true);
-            tempUser.ToDeletedEntity();
+            var tempUser = await _repository.TempUser.GetTempUser(Id, false);
+            _repository.TempUser.DeleteTempUser(tempUser);
+            var user = tempUser.UserModel;
+            if (user != null)
+            {
+                await _userManager.DeleteAsync(user);
+            }
             _repository.Save();
         }
 
@@ -44,7 +52,7 @@ namespace Service
             var users = _mapper.Map<IEnumerable<UserToReturnDto>>(await _repository.TempUser.GetAllTempUser(false));
             return users;
         }
-        public  async Task<TempUserModel> GetTempUser(Guid Id, bool trackChanges)
+        public  async Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges)
         {
             var tempUser = await _repository.TempUser.GetTempUser(Id, trackChanges);
             if (tempUser == null)

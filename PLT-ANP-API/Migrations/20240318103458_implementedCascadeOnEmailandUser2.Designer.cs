@@ -12,8 +12,8 @@ using Repository;
 namespace PLT_ANP_API.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20240306120550_MoreTablesAndRel")]
-    partial class MoreTablesAndRel
+    [Migration("20240318103458_implementedCascadeOnEmailandUser2")]
+    partial class implementedCascadeOnEmailandUser2
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -162,10 +162,6 @@ namespace PLT_ANP_API.Migrations
                     b.Property<DateTimeOffset?>("LockoutEnd")
                         .HasColumnType("datetimeoffset");
 
-                    b.Property<string>("NewUserActivationToken")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("NormalizedEmail")
                         .HasMaxLength(256)
                         .HasColumnType("nvarchar(256)");
@@ -230,9 +226,6 @@ namespace PLT_ANP_API.Migrations
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<Guid>("DealId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<int?>("EmailType")
                         .HasColumnType("int");
 
@@ -273,14 +266,17 @@ namespace PLT_ANP_API.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserModelId")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DealId");
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("UserModelId");
 
                     b.ToTable("EmailLogs");
                 });
@@ -347,6 +343,22 @@ namespace PLT_ANP_API.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "2068fb39-54f8-48d2-8fcb-912b767915c8",
+                            ConcurrencyStamp = "3a4d5888-c52b-49b9-b189-35769f40a607",
+                            Name = "Admin",
+                            NormalizedName = "ADMIN"
+                        },
+                        new
+                        {
+                            Id = "617c2bf9-41f4-467e-a5df-089604e10378",
+                            ConcurrencyStamp = "30a40c54-1620-4e8c-b95e-8f2f207d2ba3",
+                            Name = "Staff",
+                            NormalizedName = "STAFF"
+                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -466,17 +478,14 @@ namespace PLT_ANP_API.Migrations
 
             modelBuilder.Entity("Entities.SystemModel.EmailModel", b =>
                 {
-                    b.HasOne("Entities.Models.DealsModel", "Deals")
+                    b.HasOne("Entities.Models.TempUserModel", "Owner")
                         .WithMany("Emails")
-                        .HasForeignKey("DealId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Entities.Models.UserModel", "Owner")
+                    b.HasOne("Entities.Models.UserModel", null)
                         .WithMany("Emails")
-                        .HasForeignKey("UserId");
-
-                    b.Navigation("Deals");
+                        .HasForeignKey("UserModelId");
 
                     b.Navigation("Owner");
                 });
@@ -532,7 +541,7 @@ namespace PLT_ANP_API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Entities.Models.DealsModel", b =>
+            modelBuilder.Entity("Entities.Models.TempUserModel", b =>
                 {
                     b.Navigation("Emails");
                 });

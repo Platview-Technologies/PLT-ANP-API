@@ -12,7 +12,8 @@ namespace Service.Contract
     {
         Guid CreateTempUser(string email);
         Task<IEnumerable<UserToReturnDto>> GetAllTempUser();
-        void DeleteUser(Guid Id);
-        Task<TempUserModel> GetTempUser(Guid Id, bool trackChanges);
+        Task DeleteUser(Guid Id);
+        Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges);
+        
     }
 }

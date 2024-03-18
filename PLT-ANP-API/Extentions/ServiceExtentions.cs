@@ -12,6 +12,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Utilities.Constants;
+using Entities.SystemModel;
+using Service.BackgroundServices;
 
 namespace PLT_ANP_API.Extentions
 {
@@ -128,6 +130,22 @@ namespace PLT_ANP_API.Extentions
         public static void AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"));
+        }
+        public static void AddSMTPConfigurations(this IServiceCollection services, IConfiguration configuration)
+        {
+            services.Configure<SMTPSettings>(configuration.GetSection("SMTPSettings"));
+
+            services.AddOptions<SMTPSettings>()
+                .Configure<IConfiguration>((settings, configuration) =>
+                {
+                    configuration.GetSection("SMTPSettings").Bind(settings);
+                    settings.FromEmail = Environment.GetEnvironmentVariable("FromEmail");
+                    settings.FromEmailPassword = Environment.GetEnvironmentVariable("FromEmailPassword");
+                });
+        }
+        public static void ConfigureHosting(this IServiceCollection services)
+        {
+            services.AddHostedService<PLTBackGroundService>();
         }
     }
 }

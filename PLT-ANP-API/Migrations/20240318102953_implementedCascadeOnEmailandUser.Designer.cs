@@ -12,8 +12,8 @@ using Repository;
 namespace PLT_ANP_API.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20240226085211_DatabaseCreation")]
-    partial class DatabaseCreation
+    [Migration("20240318102953_implementedCascadeOnEmailandUser")]
+    partial class implementedCascadeOnEmailandUser
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -80,6 +80,46 @@ namespace PLT_ANP_API.Migrations
                     b.ToTable("Deals");
                 });
 
+            modelBuilder.Entity("Entities.Models.TempUserModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool?>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
+
+                    b.ToTable("TempUser");
+                });
+
             modelBuilder.Entity("Entities.Models.UserModel", b =>
                 {
                     b.Property<string>("Id")
@@ -139,8 +179,17 @@ namespace PLT_ANP_API.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("RefreshToken")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiryTime")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("TempUserId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("bit");
@@ -165,7 +214,7 @@ namespace PLT_ANP_API.Migrations
                     b.ToTable("AspNetUsers", (string)null);
                 });
 
-            modelBuilder.Entity("Entities.SytstemModel.EmailModel", b =>
+            modelBuilder.Entity("Entities.SystemModel.EmailModel", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
@@ -176,9 +225,6 @@ namespace PLT_ANP_API.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<Guid?>("DealsId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("EmailType")
                         .HasColumnType("int");
@@ -198,9 +244,6 @@ namespace PLT_ANP_API.Migrations
 
                     b.Property<string>("NewUserActivationToken")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("OwnerId")
-                        .HasColumnType("nvarchar(450)");
 
                     b.Property<string>("ResponseMessage")
                         .HasColumnType("nvarchar(max)");
@@ -223,16 +266,56 @@ namespace PLT_ANP_API.Migrations
                     b.Property<DateTime>("UpdatedDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UserId")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserModelId")
+                        .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DealsId");
+                    b.HasIndex("UserId");
 
-                    b.HasIndex("OwnerId");
+                    b.HasIndex("UserModelId");
 
                     b.ToTable("EmailLogs");
+                });
+
+            modelBuilder.Entity("Entities.SystemModel.EmailTemplateModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("EmailType")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Subject")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Template")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmailTemplates");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -264,15 +347,15 @@ namespace PLT_ANP_API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "7480dc61-c155-4ba3-af55-a90d6566cecb",
-                            ConcurrencyStamp = "b329b254-ce7f-4acf-bb19-6f2c3af15252",
+                            Id = "7e38dea4-cabd-4c49-a65a-78703db69ed4",
+                            ConcurrencyStamp = "0171ebef-154b-4316-b2e2-fe3db6c91f32",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "3833d8a6-6c2f-4738-8921-6de8e9b9971b",
-                            ConcurrencyStamp = "48f35988-83f4-4b22-a1d9-cc80de6f32f7",
+                            Id = "d4ba518c-9af3-4945-b326-5470452bd78f",
+                            ConcurrencyStamp = "e9b3234c-5ee8-408f-8d4d-b17ff8ca48f4",
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         });
@@ -384,17 +467,25 @@ namespace PLT_ANP_API.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("Entities.SytstemModel.EmailModel", b =>
+            modelBuilder.Entity("Entities.Models.TempUserModel", b =>
                 {
-                    b.HasOne("Entities.Models.DealsModel", "Deals")
+                    b.HasOne("Entities.Models.UserModel", "UserModel")
+                        .WithOne("TempUser")
+                        .HasForeignKey("Entities.Models.TempUserModel", "UserId");
+
+                    b.Navigation("UserModel");
+                });
+
+            modelBuilder.Entity("Entities.SystemModel.EmailModel", b =>
+                {
+                    b.HasOne("Entities.Models.TempUserModel", "Owner")
                         .WithMany("Emails")
-                        .HasForeignKey("DealsId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                    b.HasOne("Entities.Models.UserModel", "Owner")
-                        .WithMany()
-                        .HasForeignKey("OwnerId");
-
-                    b.Navigation("Deals");
+                    b.HasOne("Entities.Models.UserModel", null)
+                        .WithMany("Emails")
+                        .HasForeignKey("UserModelId");
 
                     b.Navigation("Owner");
                 });
@@ -450,9 +541,16 @@ namespace PLT_ANP_API.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Entities.Models.DealsModel", b =>
+            modelBuilder.Entity("Entities.Models.TempUserModel", b =>
                 {
                     b.Navigation("Emails");
+                });
+
+            modelBuilder.Entity("Entities.Models.UserModel", b =>
+                {
+                    b.Navigation("Emails");
+
+                    b.Navigation("TempUser");
                 });
 #pragma warning restore 612, 618
         }

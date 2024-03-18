@@ -31,7 +31,7 @@ namespace Utilities.Constants
 
         public const string Account = "Account";
         public const string Token = "Token";
-        public const string Secret = "SECRET";
+        //public const string Secret = "SECRET";
         public const string SecretKey = "SECRETKEY";
         public const string Password = "Password";
         public const string ConfirmPassword = "ConfirmPassword";

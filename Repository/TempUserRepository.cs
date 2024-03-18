@@ -20,7 +20,11 @@ namespace Repository
             Create(email);
         }
 
-       
+        public void DeleteTempUser(TempUserModel user)
+        {
+            Delete(user);
+        }
+
         public async Task<IEnumerable<TempUserModel>> GetAllTempUser(bool trackChanges)
         {
             return await FindAll(trackChanges).OrderBy(x => x.CreatedDate).ToListAsync();
@@ -28,12 +32,15 @@ namespace Repository
 
         public async Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges)
         {
-            return await FindByCondition(x => x.Id == Id, trackChanges).Include(x => x.UserModel).FirstAsync();
+            var User = await FindByCondition(x => x.Id == Id, trackChanges).Include(x => x.UserModel).SingleOrDefaultAsync();
+            return User;
         }
 
         public async Task<TempUserModel> GetTempUser(string email, bool trackChanges)
         {
             return await FindByCondition(x => x.Email == email, trackChanges).SingleOrDefaultAsync();
         }
+
+
     }
 }

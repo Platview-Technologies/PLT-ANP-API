@@ -82,7 +82,7 @@ namespace Service
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
             // Write the token as a string
-            return new TokenDto(accessToken, refreshToken);
+            return new TokenDto() { AccessToken = accessToken, RefreshToken = refreshToken};
         }
 
         public Task<string> GetEmailConfirmationToken(UserModel user)
@@ -98,7 +98,6 @@ namespace Service
             if (user == null || user.RefreshToken != tokenDto.RefreshToken ||
                 user.RefreshTokenExpiryTime <= DateTime.Now)
                 throw new RefreshTokenBadRequest();
-
             _user = user;
 
             return await CreateToken(populateExp: false);
@@ -168,13 +167,13 @@ namespace Service
 
             var result = (_user != null && await _userManager.CheckPasswordAsync(_user, userForAuth.Password));
 
+
+            if (!result)
+                throw new InvalidCredentialsException();
             if (!_user.IsActive)
             {
                 throw new ActivateUserException();
             }
-
-            if (!result)
-                throw new InvalidCredentialsException();
 
             return await CreateToken(populateExp: true);
         }
@@ -207,7 +206,12 @@ namespace Service
             var claims = new List<Claim>
             {
                 // Add the user's name as a claim
-                new Claim(ClaimTypes.Name, _user.UserName)
+                new Claim(ClaimTypes.Name, value: _user.Email),
+                new Claim(type: JwtRegisteredClaimNames.Sub, value: _user.Id),
+                new Claim(type: JwtRegisteredClaimNames.Email, value: _user.Email),
+                new Claim(type: JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(type: JwtRegisteredClaimNames.Iat, value: DateTime.Now.ToUniversalTime().ToString())
+                //new Claim(ClaimTypes.Email, _user.Email),
             };
 
             // Get the roles associated with the user
@@ -257,7 +261,7 @@ namespace Service
                 ValidateAudience = true,
                 ValidateIssuer = true,
                 ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.Secret))),
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Environment.GetEnvironmentVariable(Constants.SecretKey))),
                 ValidateLifetime = false,
                 ValidIssuer = _jwtConfiguration.ValidIssuer,
                 ValidAudience = _jwtConfiguration.ValidAudience
@@ -268,19 +272,23 @@ namespace Service
 
             // Validate the token and retrieve the principal
             SecurityToken securityToken;
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+            try { 
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
 
-            // Check if the token is a valid JwtSecurityToken
-            var jwtSecurityToken = securityToken as JwtSecurityToken;
-            if (jwtSecurityToken == null ||
-                !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-            {
-                // Throw an exception if the token is invalid
-                throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
+                // Check if the token is a valid JwtSecurityToken
+                var jwtSecurityToken = securityToken as JwtSecurityToken;
+                if (jwtSecurityToken == null ||
+                    !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    // Throw an exception if the token is invalid
+                    throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
+                }
+
+                // Return the principal extracted from the token
+                return principal;
+            } catch (Exception ex) {
+                throw new RefreshTokenBadRequest();
             }
-
-            // Return the principal extracted from the token
-            return principal;
         }
 
         public UserRegTokenDto CreateUserRegCode(string email)

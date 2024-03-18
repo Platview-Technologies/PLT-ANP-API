@@ -203,6 +203,9 @@ namespace Service
                             subjectAndMessage = await GetUserSubjectAndMessage(email);
                         }
                         break;
+                    case EmailTypeEnums.UserRegistration:
+                        subjectAndMessage = await GetUserSubjectAndMessage(email);
+                        break;
                     default:
                         break;
 
@@ -217,7 +220,16 @@ namespace Service
 
             var Tempuser = await _repository.TempUser.GetTempUser(email.UserId, false);
             var user = Tempuser.UserModel;
-
+            if (email.EmailType == EmailTypeEnums.UserRegistration)
+            {
+                user = new()
+                {
+                    Email = "null@null.com",
+                    FirstName = "null",
+                    PhoneNumber = "null",
+                    LastName = "null"
+                };
+            }
 
             if (user == null)
             {

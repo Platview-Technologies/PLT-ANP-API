@@ -18,7 +18,8 @@ namespace Repository
             modelBuilder.Entity<EmailModel>()
                 .HasOne(c => c.Owner)
                 .WithMany(p => p.Emails)
-                .HasForeignKey(c => c.UserId);
+                .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<TempUserModel>()
                 .HasOne(c => c.UserModel)

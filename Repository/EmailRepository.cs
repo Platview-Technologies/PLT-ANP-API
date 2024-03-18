@@ -1,8 +1,6 @@
 ﻿using Contract;
 using Entities.SystemModel;
 using Microsoft.EntityFrameworkCore;
-using Shared.DTOs.Response;
-using Utilities.Constants;
 using Utilities.Enum;
 
 namespace Repository

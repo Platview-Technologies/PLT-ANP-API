@@ -26,7 +26,7 @@ namespace Service
         {
             _dealService = new Lazy<IDealService>(() => new DealService(repositoryManager, logger, mapper));
             _authenticationService = new Lazy<IAuthenticationService>(() => new AuthenticationService(logger, mapper, userManager, configuration, roleManager, repositoryManager, emailService));
-            _userManagementService = new Lazy<IUserManagementService>(() => new UserManagementService(logger, repositoryManager, mapper));
+            _userManagementService = new Lazy<IUserManagementService>(() => new UserManagementService(logger, repositoryManager, mapper, userManager));
         }
         public IDealService DealService => _dealService.Value;
 

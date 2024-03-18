@@ -13,5 +13,6 @@ namespace Contract
         Task<IEnumerable<TempUserModel>> GetAllTempUser(bool trackChanges);
         Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges);
         Task<TempUserModel> GetTempUser(string email, bool trackChanges);
+        void DeleteTempUser(TempUserModel user);
     }
 }

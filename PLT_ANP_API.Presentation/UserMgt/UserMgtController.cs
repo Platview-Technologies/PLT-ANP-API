@@ -47,7 +47,7 @@ namespace PLT_ANP_API.Presentation.UserMgt
         [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteUser(Guid Id)
         {
-            _service.UserManagementService.DeleteUser(Id);
+            await _service.UserManagementService.DeleteUser(Id);
             return NoContent();
         }
 
