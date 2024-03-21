@@ -35,7 +35,6 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
                 return BadRequest(ModelState);
             }
             
-            
             NewUserDto _ = new() { message = Constants.NewAccountMessage };
             return Ok(_);
         }
@@ -69,6 +68,33 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             NewUserDto _ = new() { message = Constants.NewAccountNormalUser };
             return Ok(_);
 
+        }
+
+        [HttpPost("ForgetPassword")]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> ForgetPassword(NewUserAddDto userEmail)
+        {
+            await _service.AuthenticationService.ForgetPassword(userEmail);
+            return NoContent();
+        }
+
+        [HttpPost("ChangePassword")]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status400BadRequest)]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> ChnagePassword(ForgetPasswordDto forgetPassword)
+        {
+            var result = await _service.AuthenticationService.ChangePassword(forgetPassword);
+            if (!result.Succeeded)
+            {
+                foreach (var error in result.Errors)
+                {
+                    ModelState.TryAddModelError(error.Code, error.Description);
+                }
+                return BadRequest(ModelState);
+            }
+            return Ok();
         }
     }
 }

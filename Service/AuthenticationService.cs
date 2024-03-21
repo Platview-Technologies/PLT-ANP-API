@@ -420,5 +420,34 @@ namespace Service
             _repository.Save();
             return _tempUser.Id;
         }
+
+        public async Task ForgetPassword(NewUserAddDto user)
+        {
+            var tempUser = await _repository.TempUser.GetTempUser(user.Email, false);
+            if (tempUser.UserModel != null)
+            {
+                var code = await _userManager.GeneratePasswordResetTokenAsync(tempUser.UserModel);
+                _emailService.CreateEmail(user.Email, tempUser.Id, code, EmailTypeEnums.ResetPassword);
+            }
+        }
+
+        public async Task<IdentityResult> ChangePassword(ForgetPasswordDto forgetPassword)
+        {
+            try
+            {
+                var tempUser = await _repository.TempUser.GetTempUser(forgetPassword.UserId, true);
+                var result = await _userManager.ResetPasswordAsync(tempUser.UserModel, forgetPassword.Token, forgetPassword.Password);
+
+                if (result.Succeeded)
+                {
+                    _emailService.CreateEmail(tempUser.Email, tempUser.Id, forgetPassword.Token, EmailTypeEnums.ChangePassword);
+                }
+                return result;
+            } catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                return new IdentityResult();
+            }
+        }
     }
 }

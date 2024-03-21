@@ -1,6 +1,7 @@
 ﻿using Contract;
 using Entities.Models;
 using Entities.SystemModel;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using Microsoft.AspNetCore.Identity;
 using MimeKit;
@@ -45,7 +46,8 @@ namespace Service
                 Status = MessageStatusEnums.Pending,
                 EmailType = emailType,
                 NewUserActivationToken = token,
-                UserId = userId
+                UserId = userId,
+                ChangeOrResetUserId = userId.ToString()
             };
             _repository.Email.CreateEmailLog(_email);
             _repository.Save();
@@ -114,7 +116,7 @@ namespace Service
                             
 
 
-                using (var client = new MailKit.Net.Smtp.SmtpClient())
+                using (var client = new SmtpClient())
                 {
                     //client.EnableSsl = sMTP.SSLStatus;
                     //client.Host = sMTP.HostServer;
