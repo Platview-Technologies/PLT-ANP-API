@@ -367,3 +367,7 @@ FodyWeavers.xsd
 /PLT-ANP-API/Migrations/20240318102953_implementedCascadeOnEmailandUser.cs
 /PLT-ANP-API/Migrations/20240318103458_implementedCascadeOnEmailandUser2.cs
 /PLT-ANP-API/Migrations/RepositoryContextModelSnapshot.cs
+/PLT-ANP-API/internal_logs/internallog.txt
+/PLT-ANP-API/Migrations/20240320071107_NotificationEngine01.cs
+/PLT-ANP-API/Migrations/20240320071107_NotificationEngine01.Designer.cs
+/PLT-ANP-API/internal_logs/internallog.txt
