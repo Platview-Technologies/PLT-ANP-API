@@ -7,8 +7,7 @@ namespace Entities.Models
     public class DealsModel : EntityBase<Guid>
     {
         public DealsModel(): base()
-        {   
-           
+        {     
         }
         [Required(ErrorMessage = "Deal name is a required field.")]
         [MaxLength(30, ErrorMessage = "Maximum length for the Name is 30 characters.")]
@@ -30,5 +29,7 @@ namespace Entities.Models
         [Required(ErrorMessage = "Renewal Date for Deal is Required")]
         [DataType(DataType.DateTime)]
         public DateTime RenewalDate { get; set; }
+        public ICollection<NotificationModel> Notifications { get; set; }
+        public bool IsActive { get; set; } = false;
     }
 }

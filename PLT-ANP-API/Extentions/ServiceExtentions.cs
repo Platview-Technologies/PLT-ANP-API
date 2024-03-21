@@ -67,6 +67,7 @@ namespace PLT_ANP_API.Extentions
         {
             services.AddScoped<IEmailService, EmailService>();
             services.AddScoped<IEmailTemplateService, EmailTemplateService>();
+            services.AddScoped<INotificationService, NotificationService>();
         }
 
         public static void ConfigureServiceManager(this IServiceCollection services) =>

@@ -111,6 +111,7 @@ namespace Service
                 {
                     Text = emailContent.Message
                 };
+                            
 
 
                 using (var client = new MailKit.Net.Smtp.SmtpClient())
@@ -218,6 +219,7 @@ namespace Service
         private async Task<EmailContent> GetUserSubjectAndMessage(EmailModel email)
         {
 
+            
             var Tempuser = await _repository.TempUser.GetTempUser(email.UserId, false);
             var user = Tempuser.UserModel;
             if (email.EmailType == EmailTypeEnums.UserRegistration)
@@ -291,7 +293,8 @@ namespace Service
            
             EmailTemplateModel headerTemplate = await _emailTemplate.GetEmailTemplate(EmailTypeEnums.EmailHeader, false);
             EmailTemplateModel footerTemplate = await _emailTemplate.GetEmailTemplate(EmailTypeEnums.EmailFooter, false);
-            string finaltemplate = WrapMessageWithHTMLTableROW(headerTemplate.Template) + WrapMessageWithHTMLTableROW(message) + WrapMessageWithHTMLTableROW(footerTemplate.Template);
+            string finaltemplate = WrapMessageWithHTMLTableROW(headerTemplate.Template) +
+                WrapMessageWithHTMLTableROW(message) + WrapMessageWithHTMLTableROW(footerTemplate.Template);
 
             return AddHTMLTable(finaltemplate);
 

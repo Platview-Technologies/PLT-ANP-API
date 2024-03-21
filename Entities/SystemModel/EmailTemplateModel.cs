@@ -9,7 +9,7 @@ namespace Entities.SystemModel
     {
         public EmailTemplateModel() : base()
         {
-                
+                    
         }
         [Column(TypeName = "nvarchar(max)")]
         public string Template { get; set; }

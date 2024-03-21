@@ -53,6 +53,8 @@ namespace Utilities.Constants
         public const string entrustcertificate = "entrustcertificate";
         public const string Deal = "Deal";
         public const string Deals = "Deals";
+        public const string ccEmail = "ccEmail";
+        public const string Signature = "Signature";
 
 
 

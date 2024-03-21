@@ -27,17 +27,22 @@ namespace Repository
                 .HasForeignKey<TempUserModel>(c => c.UserId)
                 .IsRequired(false);
 
-
-
+            modelBuilder.Entity<NotificationModel>()
+                .HasOne(c => c.Deal)
+                .WithMany(p => p.Notifications)
+                .HasForeignKey(c => c.DealId)
+                .OnDelete(DeleteBehavior.Cascade);
 
             //modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
             //modelBuilder.Entity<UserModel>()
             //    .Has
+
         }
         public DbSet<DealsModel> Deals { get; set; }
         public DbSet<EmailModel> EmailLogs { get; set; }
         public DbSet<EmailTemplateModel> EmailTemplates { get; set; }
+        public DbSet<NotificationModel> Notifications { get; set; }
         public DbSet<TempUserModel> TempUser { get; set; }
     }
 }   

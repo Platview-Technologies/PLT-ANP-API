@@ -41,6 +41,12 @@ namespace Service
             _repository.Save();
         }
 
+        public async Task<IEnumerable<DealsModel>> GetActiveDeals(bool trackChanges)
+        {
+            var deals = await _repository.Deal.GetAllActiveDeals(trackChanges);
+            return deals;
+        }
+
         public async Task<DealResponseDto> GetDeal(Guid id, bool trackChanges)
         {
             var DealToReturn = _mapper.Map<DealResponseDto>(await DealExist(id, trackChanges));

@@ -8,7 +8,9 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SECRETKEY": "4A5D7F2C81E39A5BDEA5CDBB3E15499AB82F7DDE2F0A8C5D2D3F6A9C2B5E8A1F",
         "FromEmail": "godmancodes@gmail.com",
-        "FromEmailPassword": "myjbcexqqroyoxmx"
+        "FromEmailPassword": "myjbcexqqroyoxmx",
+        "ccEmail": "oluwatobiloba@platview.com",
+        "Signature": "https://i.ibb.co/W6PvQR5/sii-2.jpg"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:5000;http://localhost:5001"

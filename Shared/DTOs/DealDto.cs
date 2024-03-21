@@ -28,5 +28,6 @@ namespace Shared.DTOs
         [Required(ErrorMessage = "Renewal Date for Deal is Required")]
         [DataType(DataType.DateTime)]
         public DateTime RenewalDate { get; init; }
+        public bool IsActive { get; init; }
     }
 }

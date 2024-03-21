@@ -11,9 +11,16 @@ namespace Repository
         {
         }
         public void CreateDeal(DealsModel deal) => Create(deal);
-        
+
+        public async Task<IEnumerable<DealsModel>> GetAllActiveDeals(bool trackChanges)
+        {
+            return  await FindByCondition(x => x.IsActive, trackChanges).Include(x => x.Notifications).ToListAsync();
+            
+        }
 
         public async Task<IEnumerable<DealsModel>> GetAllDeals(bool trackChanges) => await FindAll(trackChanges).OrderBy(x => x.Name).ToListAsync();
+
+
 
         public async Task<DealsModel> GetDeal(Guid id, bool trackChanges) => 
             await FindByCondition(x => x.Id == id, trackChanges).SingleOrDefaultAsync();
