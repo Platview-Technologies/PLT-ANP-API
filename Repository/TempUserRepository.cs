@@ -41,6 +41,10 @@ namespace Repository
             return await FindByCondition(x => x.Email == email, trackChanges).Include(x => x.UserModel).SingleOrDefaultAsync();
         }
 
+        public async Task<TempUserModel> GetTempUserByUserId(string Id, bool trackChanges)
+        {
+            return await FindByCondition(x => x.UserId == Id, trackChanges).Include(x => x.UserModel).SingleOrDefaultAsync();
+        }
 
     }
 }

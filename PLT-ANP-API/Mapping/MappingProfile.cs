@@ -15,6 +15,8 @@ namespace PLT_ANP_API.Mapping
             CreateMap<UserAdminRegistrationDto, UserModel>();
             CreateMap<TempUserModel, UserToReturnDto>();
             CreateMap<NormalUserRegistrationDto, UserModel>();
+            CreateMap<UserModel, GetUserResponseDto>();
+            CreateMap<TempUserModel, UserToReturnUserDto>();
         }
     }
 }

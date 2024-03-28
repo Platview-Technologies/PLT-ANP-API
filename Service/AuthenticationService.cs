@@ -76,7 +76,7 @@ namespace Service
             _user.RefreshToken = refreshToken;
             
             if (populateExp)
-                _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(7);
+                _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(Convert.ToDouble(_jwtConfiguration.rExpires));
 
             await _userManager.UpdateAsync(_user);
 
@@ -102,6 +102,8 @@ namespace Service
 
             return await CreateToken(populateExp: false);
         }
+
+        
 
         public async Task<IdentityResult> RegisterAdminUser(UserAdminRegistrationDto userAdminRegistration)
         {
@@ -230,13 +232,13 @@ namespace Service
            List<Claim> claims)
         {
             // Get the JWT settings from the configuration
-
+            var datet = DateTime.Now.AddMinutes(Convert.ToDouble(_jwtConfiguration.Expires));
             // Create a new JWT security token with the specified options
             var tokenOptions = new JwtSecurityToken(
                 issuer: _jwtConfiguration.ValidIssuer,
                 audience: _jwtConfiguration.ValidAudience,
                 claims: claims,
-                expires: DateTime.Now.AddMinutes(Convert.ToDouble(_jwtConfiguration.Expires)),
+                expires: datet,
                 signingCredentials: signingCredentials
             );
 

@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Entities.ConfigurationModels;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PLT_ANP_API.Presentation.ActionFilters;
 using Service.Contract;
 using Shared.DTOs.Request;
 using Shared.DTOs.Response;
+using System.Security.Claims;
 using Utilities.Constants;
 
 namespace PLT_ANP_API.Presentation.AuthenticationController
@@ -49,6 +52,25 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             return Ok(userResponse);
         }
 
+        [HttpPost("loginCookie")]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status401Unauthorized)]
+        [ServiceFilter(typeof(ValidationFilterAttribute))]
+        public async Task<IActionResult> AuthenticateCookie([FromBody] UserForAuthenticationDto user)
+        {
+            var userResponse = await _service.AuthenticationService.ValidateUser(user);
+            var cookieOptions = new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Make sure to set this to true if using HTTPS
+                SameSite = SameSiteMode.None, // Adjust as per your requirements
+                MaxAge = TimeSpan.FromDays(7) // Set the cookie's expiration time
+            };
+
+            Response.Cookies.Append("rt", userResponse.RefreshToken, cookieOptions);
+            return Ok(new ATokenDto() {AccessToken = userResponse.AccessToken });
+        }
+
         [HttpPost("RegisterUser")]
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status400BadRequest)]
@@ -83,7 +105,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status400BadRequest)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> ChnagePassword(ForgetPasswordDto forgetPassword)
+        public async Task<IActionResult> ChangePassword(ForgetPasswordDto forgetPassword)
         {
             var result = await _service.AuthenticationService.ChangePassword(forgetPassword);
             if (!result.Succeeded)
@@ -96,5 +118,34 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             }
             return Ok();
         }
+
+        [HttpGet("GetUser")]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status400BadRequest)]
+        [Authorize]
+        public async Task<IActionResult> GetUser()
+        {
+            string userId = GetUserId();
+            var user = await _service.UserManagementService.GetUser(userId);
+            return Ok(user);
+        }
+
+
+        [HttpGet("IsAuth")]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status401Unauthorized)]
+        [Authorize]
+        public async Task<IActionResult> IsAuth()
+        {
+            return Ok(DateTime.Now.AddMinutes(Convert.ToDouble(1)));
+        }
+
+        private protected string GetUserId()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return userId;
+        }
+
+
     }
 }

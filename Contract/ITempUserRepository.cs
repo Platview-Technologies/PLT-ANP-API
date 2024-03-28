@@ -14,5 +14,6 @@ namespace Contract
         Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges);
         Task<TempUserModel> GetTempUser(string email, bool trackChanges);
         void DeleteTempUser(TempUserModel user);
+        Task<TempUserModel> GetTempUserByUserId(string Id, bool trackChanges);
     }
 }

@@ -14,6 +14,8 @@ namespace Service.Contract
         Task<IEnumerable<UserToReturnDto>> GetAllTempUser();
         Task DeleteUser(Guid Id);
         Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges);
-        
+        Task<UserToReturnUserDto> GetUser(string UserId);
+
+
     }
 }

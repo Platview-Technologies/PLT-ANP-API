@@ -6,11 +6,8 @@ using System.Threading.Tasks;
 
 namespace Shared.DTOs.Response
 {
-    public record UserToReturnDto
+    public record  ATokenDto
     {
-        public string Email { get; set; }
-        public bool IsActive { get; set; }
-        public Guid Id { get; set; }
-
+        public string AccessToken { get; set; }
     }
 }

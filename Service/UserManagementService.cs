@@ -62,5 +62,21 @@ namespace Service
             }
             return tempUser;
         }
+        public async Task<UserToReturnUserDto> GetUser(string UserId)
+        {
+            try
+            {
+                var user_ = await _userManager.FindByIdAsync(UserId);
+                var roles = await _userManager.GetRolesAsync(user_);
+                var _ = await _repository.TempUser.GetTempUserByUserId(UserId, false);
+                var user = _mapper.Map<UserToReturnUserDto>(_);
+                user.Roles = roles;
+                return user;
+            }catch (Exception ex)
+            {
+                _logger.LogWarn(string.Format(Constants.User, ErrorMessage.ObjectNotFound));
+                throw new NotFoundException(string.Format(Constants.User, ErrorMessage.ObjectNotFound));
+            }
+        }
     }
 }

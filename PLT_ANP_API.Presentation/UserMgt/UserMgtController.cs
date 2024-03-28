@@ -50,6 +50,5 @@ namespace PLT_ANP_API.Presentation.UserMgt
             await _service.UserManagementService.DeleteUser(Id);
             return NoContent();
         }
-
     }
 }
