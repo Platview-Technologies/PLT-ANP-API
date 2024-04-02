@@ -62,9 +62,10 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
-                Secure = false, // Make sure to set this to true if using HTTPS
+                Secure = true, // Make sure to set this to true if using HTTPS
                 SameSite = SameSiteMode.None, // Adjust as per your requirements
-                MaxAge = TimeSpan.FromDays(7) // Set the cookie's expiration time
+                MaxAge = TimeSpan.FromDays(7), // Set the cookie's expiration time
+                Expires = DateTime.Now.AddDays(7),
             };
 
             Response.Cookies.Append("rt", userResponse.RefreshToken, cookieOptions);
