@@ -1,5 +1,5 @@
 ﻿using Entities.Models;
-
+using Shared.DTOs;
 
 namespace Contract
 {
@@ -9,7 +9,8 @@ namespace Contract
         Task<IEnumerable<DealsModel>> GetAllDeals(bool trackChanges);
         Task<IEnumerable<DealsModel>> GetAllActiveDeals(bool trackChanges);
         Task<DealsModel> GetDeal(Guid id, bool trackChanges);
-        Task<DealsModel> GetDealByName(string client,string name, bool trackChanges);
+        Task<DealsModel> GetDealByName(string client, string name, bool trackChanges);
+        Task<PagedList<DealsModel>> GetDealsByPage(bool trackChanges, int page, int pageSize);
 
     }
 }

@@ -237,13 +237,21 @@ namespace Service.BackgroundServices
             }
             else if (timeDifference.TotalDays <= 0)
             {
-                TimeSpan timeD = lastNotification.UpdatedDate - DateTime.Today;
+                if (lastNotification != null)
+                {
 
-                if (timeD.TotalDays >= 1)
+                  TimeSpan timeD = lastNotification.UpdatedDate - DateTime.Today;
+
+                    if (timeD.TotalDays >= 1)
+                    {
+                        await _notificationService.CreateNotification(deal.ContactEmail, deal, EmailTypeEnums.Expiration);
+                        return;
+
+                    }
+                }
+                else
                 {
                     await _notificationService.CreateNotification(deal.ContactEmail, deal, EmailTypeEnums.Expiration);
-                    return;
-
                 }
             }
         }

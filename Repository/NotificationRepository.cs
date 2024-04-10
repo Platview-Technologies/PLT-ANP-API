@@ -28,7 +28,12 @@ namespace Repository
         }
 
         public void CreateNotification(NotificationModel notification) => Create(notification);
+        public async Task<NotificationModel> GetLastSuccessFuleNotificationForDeal(Guid dealId, bool trackChnages)
+        {
+            return await FindByCondition(x => x.DealId == dealId, trackChnages)
+                .Where(x => x.Status == MessageStatusEnums.Sent)
+                .OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync();
 
-        
+        }
     }
 }

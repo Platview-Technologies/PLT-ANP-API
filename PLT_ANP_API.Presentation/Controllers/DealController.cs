@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PLT_ANP_API.Presentation.ActionFilters;
 using Service.Contract;
 using Shared.DTOs.Request;
+using System.Text.Json;
 
 
 namespace PLT_ANP_API.Presentation.Controllers
@@ -25,6 +26,29 @@ namespace PLT_ANP_API.Presentation.Controllers
             var deals = await _service.DealService.GetDeals(false);
             return Ok(deals);
         }
+        [HttpGet("page/{Page:int}")]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(typeof(string), 400)] // Example of a bad request response
+        public async Task<IActionResult> GetDeals(int page)
+        {
+            if (page < 1)
+            {
+                return BadRequest("Page number must be greater than or equal to 1.");
+            }
+
+            var dealsPagedResult = await _service.DealService.GetDeals(false, page);
+
+            var response = new
+            {
+                Deals = dealsPagedResult.deals,
+                Metadata = dealsPagedResult.metaData
+            };
+
+            // Serialize pagination metadata to JSON and add to response headers
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(response.Metadata));
+
+            return Ok(response.Deals);
+        }
 
         [HttpGet("{Id:Guid}", Name ="GetDealById")]
         [ProducesResponseType(200)]
@@ -37,7 +61,7 @@ namespace PLT_ANP_API.Presentation.Controllers
         }
 
 
-        [HttpPost(Name = "CreatedProject")]
+        [HttpPost(Name = "CreatedDeal")]
         [ProducesResponseType(201)]
         [ProducesResponseType(400)]
         [ServiceFilter(typeof(ValidationFilterAttribute))]

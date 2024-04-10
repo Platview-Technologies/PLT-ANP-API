@@ -10,7 +10,8 @@
         "FromEmail": "godmancodes@gmail.com",
         "FromEmailPassword": "myjbcexqqroyoxmx",
         "ccEmail": "oluwatobiloba@platview.com",
-        "Signature": "https://i.ibb.co/W6PvQR5/sii-2.jpg"
+        "Signature": "https://i.ibb.co/W6PvQR5/sii-2.jpg",
+        "BaseUrl": "https://localhost:5173"
       },
       "dotnetRunMessages": true,
       "applicationUrl": "https://localhost:5000;http://localhost:5001"

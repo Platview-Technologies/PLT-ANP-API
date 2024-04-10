@@ -69,6 +69,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             };
 
             Response.Cookies.Append("rt", userResponse.RefreshToken, cookieOptions);
+            Response.Cookies.Append("aT", userResponse.AccessToken, cookieOptions);
             return Ok(new ATokenDto() {AccessToken = userResponse.AccessToken });
         }
 

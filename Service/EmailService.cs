@@ -249,7 +249,8 @@ namespace Service
                 .Replace(TagName.Surname, user.LastName)
                 .Replace(TagName.EmailAddress, user.Email)
                 .Replace(TagName.ActivationToken, string.IsNullOrEmpty(email.NewUserActivationToken) ? "" : email.NewUserActivationToken)
-                .Replace(TagName.UserId, email.UserId.ToString());
+                .Replace(TagName.UserId, email.UserId.ToString())
+                .Replace(TagName.BaseUrl, Environment.GetEnvironmentVariable("BaseUrl"));
 
             string subject = template.Subject
                 .Replace(TagName.FirstName, user.FirstName)

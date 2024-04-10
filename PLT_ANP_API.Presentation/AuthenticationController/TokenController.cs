@@ -23,21 +23,22 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         public async Task<IActionResult> Refresh([FromBody] TokenDto tokenDto)
         {
             var returnToken = await _service.AuthenticationService.RefreshToken(tokenDto);
-            return Ok(returnToken);
+            return Ok(returnToken);                               
         }
 
         [HttpPost("refreshCookie")]
-        [ServiceFilter(typeof(ValidationFilterAttribute))]
-        public async Task<IActionResult> RefreshTokenCookie([FromBody] ATokenDto aTokenDto)
+        
+        public async Task<IActionResult> RefreshTokenCookie()
         {
             string refreshToken = Request.Cookies["rt"];
-            if (refreshToken == null)
+            string accessToken = Request.Cookies["aT"];
+            if (refreshToken == null || accessToken == null)
             {
                 return Unauthorized();
             }
             var tokenDto = new TokenDto()
             {
-                AccessToken = aTokenDto.AccessToken,
+                AccessToken = accessToken,
                 RefreshToken = refreshToken
             };
 
@@ -52,6 +53,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             };
 
             Response.Cookies.Append("rt", returnToken.RefreshToken, cookieOptions);
+            Response.Cookies.Append("aT", returnToken.AccessToken, cookieOptions);
             return Ok(new ATokenDto() { AccessToken = returnToken.AccessToken });
         }
     }

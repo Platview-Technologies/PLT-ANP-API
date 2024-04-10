@@ -31,7 +31,9 @@ namespace PLT_ANP_API.Extentions
                     builder.WithOrigins("https://localhost:5173")
                            .AllowAnyMethod()
                            .AllowAnyHeader()
-                           .AllowCredentials();
+                           .AllowCredentials()
+                           .WithExposedHeaders("X-Pagination");
+                   
                 });
             });
         }

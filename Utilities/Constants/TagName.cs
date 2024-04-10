@@ -46,5 +46,6 @@ namespace Utilities.Constants
         public const string Solution = "[[Solution]]";
         public const string RegCode = "[[RegCode]]";
         public const string Signature = "[[Signature]]";
+        public const string BaseUrl = "[[BaseUrl]]";
     }
 }

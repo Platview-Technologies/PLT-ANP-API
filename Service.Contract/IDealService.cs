@@ -1,4 +1,5 @@
 ﻿using Entities.Models;
+using Shared.DTOs;
 using Shared.DTOs.Request;
 using Shared.DTOs.Response;
 using System;
@@ -17,6 +18,6 @@ namespace Service.Contract
         Task<DealResponseDto> CreateDeal(DealRequestDto dealRequest, bool trackChanges);
         Task UpdateDeal(Guid id, DealUpdateDto dealUpdate, bool trackChanges);
         Task DeleteProject(Guid id, bool trackChanges);
-
+        Task<(IEnumerable<PaginatedDealResponseDto> deals, MetaData metaData)> GetDeals(bool trackChanges, int page);
     }
 }

@@ -4,6 +4,7 @@ using Contracts;
 using Entities.Exceptions;
 using Entities.Models;
 using Service.Contract;
+using Shared.DTOs;
 using Shared.DTOs.Request;
 using Shared.DTOs.Response;
 using Utilities.Constants;
@@ -25,7 +26,7 @@ namespace Service
 
         public async Task<DealResponseDto> CreateDeal(DealRequestDto dealRequest, bool trackChanges)
         {
-            await DealExist(dealRequest.ClientName, dealRequest.Name, false);
+            await DealExist(dealRequest.Name, dealRequest.ClientName, false);
 
             var dealToCreate = _mapper.Map<DealsModel>(dealRequest);
             _repository.Deal.CreateDeal(dealToCreate);
@@ -67,7 +68,7 @@ namespace Service
             _repository.Save();
         }
 
-        private protected async Task DealExist(string name,string client, bool trackChanges)
+        private protected async Task DealExist(string name, string client, bool trackChanges)
         {
             var deal = await _repository.Deal.GetDealByName(client, name, trackChanges);
             if (deal != null)
@@ -86,6 +87,37 @@ namespace Service
             }
             return deal;
         }
-        
+        public async Task<(IEnumerable<PaginatedDealResponseDto> deals, MetaData metaData)> GetDeals(bool trackChanges, int page)
+        {
+            string pageSize = Environment.GetEnvironmentVariable("dealsPageSize");
+            int DealPageSize;
+            if (pageSize != null || pageSize == "")
+            {
+                DealPageSize = 10;
+            } else
+            {
+                try
+                {
+
+                DealPageSize = int.Parse(pageSize);
+                }
+                catch
+                {
+                    DealPageSize = 10;
+                }
+            }
+            var dealsWithMetaData = await _repository.Deal.GetDealsByPage(trackChanges, page, DealPageSize);
+            var deals = _mapper.Map<IEnumerable<PaginatedDealResponseDto>>(dealsWithMetaData);
+            foreach (var deal in deals)
+            {
+                // Query the database for the last notification associated with the deal
+                var lastNotification = await _repository.Notification.GetLastSuccessFuleNotificationForDeal(deal.Id, trackChanges);
+
+                // Map the last notification to DTO format if needed and set it to the deal's property
+                deal.LastNotificationSent = _mapper.Map<NotificationResponseDto>(lastNotification);
+
+            }
+            return (deals, dealsWithMetaData.MetaData);
+        }
     }
 }
