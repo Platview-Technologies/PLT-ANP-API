@@ -14,5 +14,7 @@ namespace Shared.DTOs.Response
         public string UserId { get; init; }
         public GetUserResponseDto UserModel { get; set; }
         public ICollection<string> Roles { get; set; }
-     }
+        public DateTime CreatedDate { get; set; }
+        public string Role { get; set; }
+    }
 }

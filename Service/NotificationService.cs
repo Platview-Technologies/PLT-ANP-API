@@ -1,9 +1,13 @@
-﻿using Contract;
+﻿using AutoMapper;
+using Contract;
+using Entities.Exceptions;
 using Entities.Models;
 using Entities.SystemModel;
 using MailKit.Security;
 using MimeKit;
 using Service.Contract;
+using Shared.DTOs;
+using Shared.DTOs.Response;
 using Utilities.Constants;
 using Utilities.Enum;
 using Utilities.Utilities;
@@ -14,10 +18,12 @@ namespace Service
     {
         private readonly IRepositoryManager _repository;
         private IEmailTemplateService _emailTemplate;
-        public NotificationService(IRepositoryManager repository, IEmailTemplateService emailTemplate)
+        private IMapper _mapper;
+        public NotificationService(IRepositoryManager repository, IEmailTemplateService emailTemplate, IMapper mapper)
         {
             _repository = repository;
             _emailTemplate = emailTemplate;
+            _mapper = mapper;
 
         }
         public Task CreateNotification(string message, string subject, string email)
@@ -106,22 +112,21 @@ namespace Service
                         pendingNotifications.Status = MessageStatusEnums.Sent;
                         pendingNotifications.Sentdate = DateTime.Now;
                         pendingNotifications.ResponseMessage = sentConfirmation;
+                        pendingNotifications.Subject = content.Subject;
+                        pendingNotifications.Message = content.Message;
                     }
                     else
                     {
+                        
                         pendingNotifications.Status = MessageStatusEnums.SentPartially;
                         pendingNotifications.ResponseMessage = "Unable to send to these emails: " + string.Join(",", unConfirmedEmails) + ". Either Email(s) does not exist or their respective domain(s) has expired";
                         pendingNotifications.Sentdate = DateTime.Now;
                         pendingNotifications.FailedDate = DateTime.Now;
                     }
                 }
-
-
-
             }
             catch (Exception ex)
             {
-
                 pendingNotifications.Status = MessageStatusEnums.Failed;
                 pendingNotifications.FailedDate = DateTime.Now;
                 pendingNotifications.ResponseMessage = ex.Message;
@@ -267,6 +272,29 @@ namespace Service
             HtmlTable += "</div>";
 
             return HtmlTable;
+        }
+
+        public async Task<(IEnumerable<NotificationResponseDto> notifications, MetaData metaData)> GetNotifications(bool trackChanges, int page)
+        {
+            var notificationsWithMetaData = await _repository.Notification.GetNotificationsAsync(trackChanges, page);
+            var notifications = _mapper.Map<IEnumerable<NotificationResponseDto>>(notificationsWithMetaData);
+            return (notifications, notificationsWithMetaData.MetaData);
+        }
+
+        public async Task<NotificationDto> GetNotification(Guid Id, bool trackChanges)
+        {
+            var notification = _mapper.Map<NotificationDto>(await NotificationExist(Id, trackChanges));
+            return notification;
+        }
+
+        private async Task<NotificationModel> NotificationExist(Guid Id, bool trackChanges)
+        {
+            var notification = await _repository.Notification.GetNotification(Id, trackChanges);
+            if (notification == null)
+            {
+                throw new NotFoundException(string.Format(ErrorMessage.ObjectNotFound, Constants.Notififcation));
+            }
+            return notification;
         }
     }
 }

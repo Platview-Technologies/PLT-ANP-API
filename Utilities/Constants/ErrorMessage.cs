@@ -8,5 +8,6 @@ namespace Utilities.Constants
         public const string ObjectTodeleteDoesNotExist = "{0} you want toe delete does not exist";
         public const string InvalidLicense = "Invalid License please contact support";
         public const string InvalidObject = "Invalid {0}";
+        public const string ObjectAlreadyExist = "{0} already exist";
     }
 }

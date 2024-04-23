@@ -27,7 +27,8 @@ namespace Repository
 
         public async Task<IEnumerable<TempUserModel>> GetAllTempUser(bool trackChanges)
         {
-            return await FindAll(trackChanges).OrderBy(x => x.CreatedDate).ToListAsync();
+            var users = await FindByCondition(x => x.IsDeleted == false, trackChanges).Include(x => x.UserModel).OrderBy(x => x.CreatedDate).ToListAsync();
+            return users;
         }
 
         public async Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges)

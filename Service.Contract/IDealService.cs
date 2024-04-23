@@ -17,7 +17,7 @@ namespace Service.Contract
         Task<DealResponseDto> GetDeal(Guid id, bool trackChanges);
         Task<DealResponseDto> CreateDeal(DealRequestDto dealRequest, bool trackChanges);
         Task UpdateDeal(Guid id, DealUpdateDto dealUpdate, bool trackChanges);
-        Task DeleteProject(Guid id, bool trackChanges);
+        Task DeleteDeals(Guid id, bool trackChanges);
         Task<(IEnumerable<PaginatedDealResponseDto> deals, MetaData metaData)> GetDeals(bool trackChanges, int page);
     }
 }

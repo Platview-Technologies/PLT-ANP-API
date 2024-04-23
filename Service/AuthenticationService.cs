@@ -122,7 +122,7 @@ namespace Service
                 var validRoles = roles
                   .Where(role => _roleManager.RoleExistsAsync(role).GetAwaiter().GetResult())
                   .ToList();
-                Guid TemUser = await TaskSyncTempAndAdminUser(user.Email, user);
+                Guid TemUser = await TaskSyncTempAndAdminUser(user.Email, user, validRoles[0]);
                 var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                 // Add user to the roles and user join table
                 await _userManager.AddToRolesAsync(user, validRoles);
@@ -157,7 +157,7 @@ namespace Service
                 // Add user to the roles and user join table
                 await _userManager.AddToRolesAsync(user, validRoles);
                 _emailService.CreateEmail(user.Email, tempUser.Id, null,emailType:EmailTypeEnums.NewAccount);
-                await SyncTempUserAndUserAsync(email, user);
+                await SyncTempUserAndUserAsync(email, user, validRoles[0]);
             }
             return result;
         }
@@ -392,7 +392,7 @@ namespace Service
             return Tuple.Create(principal, emailClaim.Value);
         }
 
-        private async Task SyncTempUserAndUserAsync(string email, UserModel user)
+        private async Task SyncTempUserAndUserAsync(string email, UserModel user, string roles)
         {
             var tempUser = await _repository.TempUser.GetTempUser(email, true);
             if (tempUser == null)
@@ -402,9 +402,10 @@ namespace Service
             }
             tempUser.UserId = user.Id;
             tempUser.IsActive = true;
+            tempUser.Role = roles;
             _repository.Save();
         }
-        private async Task<Guid> TaskSyncTempAndAdminUser(string email, UserModel user)
+        private async Task<Guid> TaskSyncTempAndAdminUser(string email, UserModel user, string roles)
         {
             var tempUser = await _repository.TempUser.GetTempUser(email, true);
             if (tempUser != null)
@@ -416,7 +417,9 @@ namespace Service
             {
                 Email = email,
                 IsActive = true,
-                UserId = user.Id
+                UserId = user.Id,
+                Role = roles
+                
             };
             _repository.TempUser.CreateTempUser(_tempUser);
             _repository.Save();

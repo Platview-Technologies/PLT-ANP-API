@@ -24,8 +24,9 @@ namespace Service
             _mapper = mapper;
             _userManager = userManager;
         }
-        public Guid CreateTempUser(string email)
+        public async Task<Guid> CreateTempUser(string email)
         {
+            await GetUserByEmail(email);
             TempUserModel tempUser = new()
             {
                 Email = email
@@ -47,9 +48,9 @@ namespace Service
             _repository.Save();
         }
 
-        public async Task<IEnumerable<UserToReturnDto>> GetAllTempUser()
+        public async Task<IEnumerable<UserToReturnUserDto>> GetAllTempUser()
         {
-            var users = _mapper.Map<IEnumerable<UserToReturnDto>>(await _repository.TempUser.GetAllTempUser(false));
+            var users = _mapper.Map<IEnumerable<UserToReturnUserDto>>(await _repository.TempUser.GetAllTempUser(false));
             return users;
         }
         public  async Task<TempUserModel> GetTempUser(Guid? Id, bool trackChanges)
@@ -61,6 +62,17 @@ namespace Service
                 throw new NotFoundException(string.Format(ErrorMessage.ObjectNotFound, "User"));
             }
             return tempUser;
+        }
+
+        private async Task<bool> GetUserByEmail(string email)
+        {
+            var tempUser = await _repository.TempUser.GetTempUser(email, false);
+            if (tempUser != null)
+            {
+                throw new UserAlreadyExistException();
+            }
+            return true;
+
         }
         public async Task<UserToReturnUserDto> GetUser(string UserId)
         {

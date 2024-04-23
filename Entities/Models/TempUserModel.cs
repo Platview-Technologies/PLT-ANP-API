@@ -1,5 +1,6 @@
 ﻿using Entities.Interfaces;
 using Entities.SystemModel;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -22,5 +23,6 @@ namespace Entities.Models
         public string? UserId { get; set; }
         public UserModel? UserModel {get; set;}
         public ICollection<EmailModel> Emails { get; set; }
+        public string? Role { get; set; }
     }
 }

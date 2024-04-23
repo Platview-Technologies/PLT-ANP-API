@@ -11,13 +11,12 @@ namespace Shared.DTOs.Response
     public class NotificationResponseDto
     {
         public Guid Id { get; init; }
-        public string? Message { get; init; }
         public EmailTypeEnums? EmailType { get; init; }
         public MessageStatusEnums Status { get; init; }
         public DateTime? Sentdate { get; init; }
         public DateTime? FailedDate { get; init; }
         public string Emailaddresses { get; init; }
-        public string? Subject { get; init; }
         public string? ResponseMessage { get; init; }
+        public Guid DealId { get; init; }
     }
 }

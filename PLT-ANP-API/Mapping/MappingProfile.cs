@@ -20,6 +20,7 @@ namespace PLT_ANP_API.Mapping
             CreateMap<TempUserModel, UserToReturnUserDto>();
             CreateMap<DealsModel, PaginatedDealResponseDto>();
             CreateMap<NotificationModel, NotificationResponseDto>();
+            CreateMap<NotificationModel, NotificationDto>();
         }
     }
 }

@@ -1,6 +1,8 @@
 ﻿using Contract;
+using Entities.Models;
 using Entities.SystemModel;
 using Microsoft.EntityFrameworkCore;
+using Shared.DTOs;
 using Utilities.Enum;
 
 namespace Repository
@@ -34,6 +36,17 @@ namespace Repository
                 .Where(x => x.Status == MessageStatusEnums.Sent)
                 .OrderBy(x => x.UpdatedDate).FirstOrDefaultAsync();
 
+        }
+
+        public async Task<PagedList<NotificationModel>> GetNotificationsAsync(bool trackChanges, int page)
+        {
+            var notifications = await FindByCondition(x => !x.IsDeleted, trackChanges)
+                .Include(x => x.Deal)
+                .OrderByDescending(x => x.UpdatedDate)
+                .ToListAsync();
+
+            return PagedList<NotificationModel>
+               .ToPagedList(notifications, page, 20);
         }
     }
 }

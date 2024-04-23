@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using PLT_ANP_API.Presentation.ActionFilters;
 using Service.Contract;
 using Shared.DTOs.Request;
+using Shared.DTOs.Response;
 using Utilities.Enum;
 
 namespace PLT_ANP_API.Presentation.UserMgt
@@ -28,10 +29,15 @@ namespace PLT_ANP_API.Presentation.UserMgt
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> AddNewUser([FromBody] NewUserAddDto emailUser)
         {
-            Guid TempUserId = _service.UserManagementService.CreateTempUser(emailUser.Email);
+            Guid TempUserId = await _service.UserManagementService.CreateTempUser(emailUser.Email);
             var Token = _service.AuthenticationService.CreateUserRegCode(emailUser.Email);
             _emailService.CreateEmail(email: emailUser.Email, tempUserId: TempUserId, token: Token.regCode, emailType: EmailTypeEnums.UserRegistration);
-            return Ok();
+            var _ = new TempUserResponseDto()
+            {
+                Id = TempUserId
+            };
+
+            return Ok(_);
         }
 
         [HttpGet()]

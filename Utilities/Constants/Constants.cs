@@ -55,6 +55,7 @@ namespace Utilities.Constants
         public const string Deals = "Deals";
         public const string ccEmail = "ccEmail";
         public const string Signature = "Signature";
+        public const string Notififcation = "Notififcation";
 
 
 

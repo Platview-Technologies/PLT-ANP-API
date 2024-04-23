@@ -2,8 +2,7 @@
 
 namespace Shared.DTOs.Response
 {
-    public record DealResponseDto: DealDto
+    public record PaginatedDealResponseDto : DealResponseDto
     {
-       public Guid Id { get; init; }
     }
 }

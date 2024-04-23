@@ -19,9 +19,9 @@ namespace Repository
         }
         public async Task<PagedList<DealsModel>> GetDealsByPage(bool trackChanges, int page, int pageSize)
         {
-            var deals = await FindAll(trackChanges)
+            var deals = await FindByCondition(x => !x.IsDeleted, trackChanges)
                 .Include(x => x.Notifications)
-                .OrderBy(r => r.UpdatedDate)
+                .OrderByDescending(r => r.CreatedDate)
                 .ToListAsync();
             return PagedList<DealsModel>
                 .ToPagedList(deals, page, pageSize);
@@ -31,14 +31,14 @@ namespace Repository
 
 
         public async Task<DealsModel> GetDeal(Guid id, bool trackChanges) =>
-            await FindByCondition(x => x.Id == id, trackChanges).SingleOrDefaultAsync();
+            await FindByCondition(x => x.Id == id, trackChanges).Include(x => x.Notifications).SingleOrDefaultAsync();
 
         public async Task<DealsModel> GetDealByName(string client, string name, bool trackChanges) {
             return await FindByCondition(x => x.ClientName.ToLower() == client.ToLower(), trackChanges)
             .Where(x => x.Name.ToLower() == name.ToLower())
             .FirstOrDefaultAsync();
             
-            }
+         }
     }
     
 }

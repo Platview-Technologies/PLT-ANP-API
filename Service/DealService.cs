@@ -35,11 +35,11 @@ namespace Service
             return dealToReturn;
         }
 
-        public async Task DeleteProject(Guid id, bool trackChanges)
+        public async Task DeleteDeals(Guid id, bool trackChanges)
         {
             var dealToDelete = await DealExist(id, trackChanges);
             dealToDelete.ToDeletedEntity();
-            _repository.Save();
+            await _repository.SaveAsync();
         }
 
         public async Task<IEnumerable<DealsModel>> GetActiveDeals(bool trackChanges)
@@ -82,7 +82,7 @@ namespace Service
             var deal = await _repository.Deal.GetDeal(id, trackChanges);
             if (deal == null)
             {
-                _logger.LogInfo(string.Format(ErrorMessage.ObjectNotFound, Constants.Deal));
+       
                 throw new NotFoundException(string.Format(ErrorMessage.ObjectNotFound, Constants.Deal));
             }
             return deal;

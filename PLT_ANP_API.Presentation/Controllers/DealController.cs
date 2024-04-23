@@ -38,16 +38,11 @@ namespace PLT_ANP_API.Presentation.Controllers
 
             var dealsPagedResult = await _service.DealService.GetDeals(false, page);
 
-            var response = new
-            {
-                Deals = dealsPagedResult.deals,
-                Metadata = dealsPagedResult.metaData
-            };
 
             // Serialize pagination metadata to JSON and add to response headers
-            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(response.Metadata));
+            Response.Headers.Add("X-Pagination", JsonSerializer.Serialize(dealsPagedResult.metaData));
 
-            return Ok(response.Deals);
+            return Ok(dealsPagedResult.deals);
         }
 
         [HttpGet("{Id:Guid}", Name ="GetDealById")]
@@ -86,7 +81,7 @@ namespace PLT_ANP_API.Presentation.Controllers
         [ProducesResponseType(204)]
         public async Task<IActionResult> DeleteDeal(Guid Id)
         {
-            await _service.DealService.DeleteProject(Id, true);
+            await _service.DealService.DeleteDeals(Id, true);
             return NoContent();
         }
 
