@@ -296,5 +296,10 @@ namespace Service
             }
             return notification;
         }
+
+        //public async Task GetNotificationGeneralInfo()
+        //{
+        //    var notifi
+        //}
     }
 }
