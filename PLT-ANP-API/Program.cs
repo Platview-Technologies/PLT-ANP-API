@@ -45,17 +45,19 @@ builder.Services.AddControllers()
     .AddApplicationPart(typeof(AssemblyReference).Assembly);
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
+//builder.Services.AddSwaggerGen();
+builder.Services.ConfigureSwagger();
 var app = builder.Build();
 AppDomain.CurrentDomain.SetData(Constants.WebRootPath, app.Environment.WebRootPath);
 app.UseCors("CorsPolicy");
 // Configure the HTTP request pipeline.
+app.UseSwagger();
+app.UseSwaggerUI(s => s.SwaggerEndpoint("/swagger/v1/swagger.json", "PLT-ANP-API By Platview"));
 if (app.Environment.IsDevelopment())
 {
     app.UseDeveloperExceptionPage();
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    
+   
 }
 else
     app.UseHsts();

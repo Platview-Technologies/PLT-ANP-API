@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Contract;
+using Contracts;
 using Entities.Exceptions;
 using Entities.Models;
 using Entities.SystemModel;
@@ -19,11 +20,14 @@ namespace Service
         private readonly IRepositoryManager _repository;
         private IEmailTemplateService _emailTemplate;
         private IMapper _mapper;
-        public NotificationService(IRepositoryManager repository, IEmailTemplateService emailTemplate, IMapper mapper)
+        private readonly ILoggerManager _logger;
+
+        public NotificationService(IRepositoryManager repository, IEmailTemplateService emailTemplate, IMapper mapper, ILoggerManager logger)
         {
             _repository = repository;
             _emailTemplate = emailTemplate;
             _mapper = mapper;
+            _logger = logger;
 
         }
         public Task CreateNotification(string message, string subject, string email)
@@ -55,11 +59,12 @@ namespace Service
         {
             try
             {
-                if (sMTP == null)
+                if (sMTP == null || sMTP.FromEmailPassword == null || sMTP.FromEmailPassword == null )
                 {
                     pendingNotifications.Status = MessageStatusEnums.Failed;
                     pendingNotifications.FailedDate = DateTime.Now;
                     pendingNotifications.ResponseMessage = "SMTP not configured yet";
+                    _logger.LogError("SMTP not configured yet");
                     return;
                 }
 

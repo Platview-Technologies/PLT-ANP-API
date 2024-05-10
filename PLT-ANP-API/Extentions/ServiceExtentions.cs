@@ -14,6 +14,7 @@ using System.Text;
 using Utilities.Constants;
 using Entities.SystemModel;
 using Service.BackgroundServices;
+using Microsoft.OpenApi.Models;
 
 namespace PLT_ANP_API.Extentions
 {
@@ -62,6 +63,7 @@ namespace PLT_ANP_API.Extentions
 
         public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
         {
+            
             services.AddDbContext<RepositoryContext>(opts =>
                 opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
         }
@@ -103,6 +105,10 @@ namespace PLT_ANP_API.Extentions
         public static void ConfigureJWT(this IServiceCollection services, IConfiguration configuration)
         {
             var jwtConfiguration = new JwtConfiguration();
+            jwtConfiguration.rExpires = Environment.GetEnvironmentVariable("rexpires");
+            jwtConfiguration.Expires = Environment.GetEnvironmentVariable("expires");
+            jwtConfiguration.ValidIssuer = Environment.GetEnvironmentVariable("ValidIssuer");
+            jwtConfiguration.ValidAudience = Environment.GetEnvironmentVariable("ValidAudience");
             configuration.Bind(jwtConfiguration.Section, jwtConfiguration);
 
             var secretKey = Environment.GetEnvironmentVariable(Constants.SecretKey);
@@ -136,6 +142,15 @@ namespace PLT_ANP_API.Extentions
         public static void AddJwtConfiguration(this IServiceCollection services, IConfiguration configuration)
         {
             services.Configure<JwtConfiguration>(configuration.GetSection("JwtSettings"));
+            services.AddOptions<JwtConfiguration>().Configure<IConfiguration>((settings, configuration) =>
+            {
+                configuration.GetSection("SMTPSettings").Bind(settings);
+                settings.rExpires = Environment.GetEnvironmentVariable("rexpires");
+                settings.Expires = Environment.GetEnvironmentVariable("expires");
+                settings.ValidIssuer = Environment.GetEnvironmentVariable("ValidIssuer");
+                settings.ValidAudience = Environment.GetEnvironmentVariable("ValidAudience");
+            });
+
         }
         public static void AddSMTPConfigurations(this IServiceCollection services, IConfiguration configuration)
         {
@@ -147,11 +162,70 @@ namespace PLT_ANP_API.Extentions
                     configuration.GetSection("SMTPSettings").Bind(settings);
                     settings.FromEmail = Environment.GetEnvironmentVariable("FromEmail");
                     settings.FromEmailPassword = Environment.GetEnvironmentVariable("FromEmailPassword");
+                    settings.SSLStatus = bool.Parse(Environment.GetEnvironmentVariable("SSLStatus"));
+                    settings.HostPort = int.Parse(Environment.GetEnvironmentVariable("HostPort"));
+                    settings.HostServer = Environment.GetEnvironmentVariable("HostServer");
                 });
         }
         public static void ConfigureHosting(this IServiceCollection services)
         {
             services.AddHostedService<PLTBackGroundService>();
         }
-    }
+        public static void ConfigureSwagger(this IServiceCollection services)
+        {
+            services.AddSwaggerGen(s =>
+            {
+                s.SwaggerDoc(
+                    "v1",
+                    new OpenApiInfo
+                    {
+                        Title = "PLT-ANP-API",
+                        Version = "v1",
+                        Description = "ALert Notification Platform API by Platview",
+                        TermsOfService = new Uri("https://example.com/terms"),
+                        Contact = new OpenApiContact
+                        {
+                            Name = "John Doe",
+                            Email = "John.Doe@gmail.com",
+                            Url = new Uri("https://twitter.com/Godman-codes"),
+                        },
+                        License = new OpenApiLicense
+                        {
+                            Name = "PLT-ANP API LICX",
+                            Url = new Uri("https://example.com/license"),
+                        }
+                    });
+                s.AddSecurityDefinition(
+                    "Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        In = ParameterLocation.Header,
+                        Description = "Place to add JWT with Bearer",
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.ApiKey,
+                        Scheme = "Bearer"
+                    });
+                s.AddSecurityRequirement(
+                    new OpenApiSecurityRequirement()
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference = new OpenApiReference
+                                {
+                                    Type = ReferenceType.SecurityScheme,
+                                    Id = "Bearer"
+                                },
+                                Name = "Bearer",
+                            },
+                            new List<string>()
+                        }
+                    });
+                var xmlFile = $"{typeof(Presentation.AssemblyReference).Assembly.GetName().Name}.xml";
+                var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+                s.IncludeXmlComments(xmlPath);
+            });
+        }
+    
+}
 }

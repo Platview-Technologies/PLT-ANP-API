@@ -9,6 +9,6 @@ namespace Utilities.Enum
         Sent,
         Failed,
         [Display(Name = "Sent Partially")]
-        SentPartially
+        SentPartially,
     }
 }

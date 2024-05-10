@@ -8,6 +8,7 @@ namespace PLT_ANP_API.ContextFactory
     {
         public RepositoryContext CreateDbContext(string[] args)
         {
+           
             var configuration = new ConfigurationBuilder()
                .SetBasePath(Directory.GetCurrentDirectory())
                .AddJsonFile("appsettings.json")

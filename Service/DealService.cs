@@ -63,6 +63,7 @@ namespace Service
         public async Task UpdateDeal(Guid id, DealUpdateDto dealUpdate, bool trackChanges)
         {
             var dealToUpdate = await DealExist(id, trackChanges);
+            await DealExist(dealUpdate.Name, dealUpdate.ClientName, trackChanges);
             var updatedDeal = _mapper.Map(dealUpdate, dealToUpdate);
             updatedDeal.ToUpdate();
             _repository.Save();

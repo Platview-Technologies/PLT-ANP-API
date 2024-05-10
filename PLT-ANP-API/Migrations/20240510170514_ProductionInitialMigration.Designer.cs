@@ -12,8 +12,8 @@ using Repository;
 namespace PLT_ANP_API.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20240318090644_initialDbCreation")]
-    partial class initialDbCreation
+    [Migration("20240510170514_ProductionInitialMigration")]
+    partial class ProductionInitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -54,6 +54,9 @@ namespace PLT_ANP_API.Migrations
 
                     b.Property<DateTime>("CreatedDate")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -98,6 +101,9 @@ namespace PLT_ANP_API.Migrations
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Role")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<byte[]>("Timestamp")
                         .IsConcurrencyToken()
@@ -318,6 +324,62 @@ namespace PLT_ANP_API.Migrations
                     b.ToTable("EmailTemplates");
                 });
 
+            modelBuilder.Entity("Entities.SystemModel.NotificationModel", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("DealId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("EmailType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Emailaddresses")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("FailedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ResponseMessage")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("Sentdate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Subject")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<byte[]>("Timestamp")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateTime>("UpdatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DealId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -347,15 +409,15 @@ namespace PLT_ANP_API.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "63d4a45f-f15a-410a-801a-5a2956f816cc",
-                            ConcurrencyStamp = "b74a032f-1b4b-47a9-8c60-fa60b011eb27",
+                            Id = "8fb06856-e313-4457-b15a-349a3a630600",
+                            ConcurrencyStamp = "169e121e-bbcc-4341-94f1-18af8c2414aa",
                             Name = "Admin",
                             NormalizedName = "ADMIN"
                         },
                         new
                         {
-                            Id = "aa31a30a-6ac0-4265-8645-20a9f3f449cc",
-                            ConcurrencyStamp = "985524cf-a7ae-4367-9044-f1c7da2c2f39",
+                            Id = "e7f94863-0595-45ea-9e97-b3786c934c08",
+                            ConcurrencyStamp = "11cc467d-d305-4448-ad58-f4277b4e227c",
                             Name = "Staff",
                             NormalizedName = "STAFF"
                         });
@@ -480,13 +542,25 @@ namespace PLT_ANP_API.Migrations
                 {
                     b.HasOne("Entities.Models.TempUserModel", "Owner")
                         .WithMany("Emails")
-                        .HasForeignKey("UserId");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Entities.Models.UserModel", null)
                         .WithMany("Emails")
                         .HasForeignKey("UserModelId");
 
                     b.Navigation("Owner");
+                });
+
+            modelBuilder.Entity("Entities.SystemModel.NotificationModel", b =>
+                {
+                    b.HasOne("Entities.Models.DealsModel", "Deal")
+                        .WithMany("Notifications")
+                        .HasForeignKey("DealId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Deal");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -538,6 +612,11 @@ namespace PLT_ANP_API.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Entities.Models.DealsModel", b =>
+                {
+                    b.Navigation("Notifications");
                 });
 
             modelBuilder.Entity("Entities.Models.TempUserModel", b =>

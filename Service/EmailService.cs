@@ -1,4 +1,5 @@
 ﻿using Contract;
+using Contracts;
 using Entities.Models;
 using Entities.SystemModel;
 using MailKit.Net.Smtp;
@@ -17,12 +18,14 @@ namespace Service
         private readonly IRepositoryManager _repository;
         private readonly UserManager<UserModel> _userManager;
         private readonly IEmailTemplateService _emailTemplate;
-        public EmailService(IRepositoryManager repository, UserManager<UserModel> userManager, IEmailTemplateService emailTemplate)
+        private readonly ILoggerManager _logger;
+
+        public EmailService(IRepositoryManager repository, UserManager<UserModel> userManager, IEmailTemplateService emailTemplate, ILoggerManager logger)
         {
             _repository = repository;
             _userManager = userManager;
             _emailTemplate = emailTemplate;
-
+            _logger = logger;
         }
         public void CreateEmail(string message, string subject, string email)
         {
@@ -78,6 +81,7 @@ namespace Service
                     pendingEmail.Status = MessageStatusEnums.Failed;
                     pendingEmail.FailedDate = DateTime.Now;
                     pendingEmail.ResponseMessage = "SMTP not configure yet";
+                    _logger.LogError("SMTP not configured yet");
 
                     return;
                 }
@@ -152,6 +156,7 @@ namespace Service
                 pendingEmail.Status = MessageStatusEnums.Failed;
                 pendingEmail.FailedDate = DateTime.Now;
                 pendingEmail.ResponseMessage = ex.Message;
+                _logger.LogError(ex.Message);
 
             }
         }
