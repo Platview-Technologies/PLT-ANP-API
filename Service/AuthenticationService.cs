@@ -403,7 +403,7 @@ namespace Service
             tempUser.UserId = user.Id;
             tempUser.IsActive = true;
             tempUser.Role = roles;
-            _repository.Save();
+            await _repository.SaveAsync();
         }
         private async Task<Guid> TaskSyncTempAndAdminUser(string email, UserModel user, string roles)
         {
@@ -422,7 +422,7 @@ namespace Service
                 
             };
             _repository.TempUser.CreateTempUser(_tempUser);
-            _repository.Save();
+            await _repository.SaveAsync();
             return _tempUser.Id;
         }
 

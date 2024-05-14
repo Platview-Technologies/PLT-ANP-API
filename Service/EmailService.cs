@@ -10,6 +10,7 @@ using Service.Contract;
 using Utilities.Constants;
 using Utilities.Enum;
 using Utilities.Utilities;
+//using System.Net.Mail;
 
 namespace Service
 {
@@ -27,7 +28,7 @@ namespace Service
             _emailTemplate = emailTemplate;
             _logger = logger;
         }
-        public void CreateEmail(string message, string subject, string email)
+        public async Task CreateEmail(string message, string subject, string email)
         {
             EmailModel _email = new EmailModel()
             {
@@ -38,9 +39,9 @@ namespace Service
                 Subject = subject,
             };
             _repository.Email.CreateEmailLog(_email);
-            _repository.Save();
+            await _repository.SaveAsync();
         }
-        public void CreateEmail(string email, Guid? userId, string? token, EmailTypeEnums emailType)
+        public async Task CreateEmail(string email, Guid? userId, string? token, EmailTypeEnums emailType)
         {
             EmailModel _email = new EmailModel()
             {
@@ -53,7 +54,7 @@ namespace Service
                 ChangeOrResetUserId = userId.ToString()
             };
             _repository.Email.CreateEmailLog(_email);
-            _repository.Save();
+            await _repository.SaveAsync();
         }
         //public async Task<List<EmailModel>> GetPendingEmails(int page, int pageSize)
         //{
@@ -117,26 +118,39 @@ namespace Service
                 {
                     Text = emailContent.Message
                 };
-                            
 
+                var ccEmails = Environment.GetEnvironmentVariable(Constants.ccEmail);
+                if (!string.IsNullOrEmpty(ccEmails))
+                {
+                    var ccEmailList = ccEmails.Split(Constants.Comma).Select(x => x.Trim()).ToList();
+                    foreach (var ccEmail in ccEmailList)
+                    {
+                        mail.Cc.Add(MailboxAddress.Parse(ccEmail));
+                    }
+                }
 
                 using (var client = new SmtpClient())
                 {
                     //client.EnableSsl = sMTP.SSLStatus;
                     //client.Host = sMTP.HostServer;
                     //client.Port = sMTP.HostPort;
-                    //client.DeliveryMethod = SmtpDeliveryMethod.Network;
-                    //client.UseDefaultCredentials = true;
                     //client.Credentials = new NetworkCredential(sMTP.FromEmail, sMTP.FromEmailPassword);
-                    client.Connect(sMTP.HostServer, sMTP.HostPort, SecureSocketOptions.StartTls);
-                    client.Authenticate(sMTP.FromEmail, sMTP.FromEmailPassword);
+                    //client.UseDefaultCredentials = true;
+
+                    //client.DeliveryMethod = SmtpDeliveryMethod.Network;
+
+                    await client.ConnectAsync(sMTP.HostServer, sMTP.HostPort, SecureSocketOptions.StartTls);
+                    
+                    await client.AuthenticateAsync(sMTP.FromEmail, sMTP.FromEmailPassword);
                     var sentConfirmation = await client.SendAsync(mail);
+                    await client.DisconnectAsync(true);
 
                     if (confirmedEmails.Count() == splittedEmails.Count())
                     {
                         pendingEmail.Status = MessageStatusEnums.Sent;
                         pendingEmail.Sentdate = DateTime.Now;
                         pendingEmail.ResponseMessage = sentConfirmation;
+                        _logger.LogInfo("sent....");
                     }
                     else
                     {
@@ -144,23 +158,60 @@ namespace Service
                         pendingEmail.ResponseMessage = "Unable to send to these emails: " + string.Join(",", unConfirmedEmails) + ". Either Email(s) does not exist or their respective domain(s) has expired";
                         pendingEmail.Sentdate = DateTime.Now;
                         pendingEmail.FailedDate = DateTime.Now;
+                        _logger.LogInfo("sent....");
                     }
                 }
-
-
-
+            }
+            catch (IOException ioEx)
+            {
+                // IOException occurred (retryable)
+                HandleRetryableError(ioEx, pendingEmail);
+            }
+            catch (TimeoutException timeoutEx)
+            {
+                // TimeoutException occurred (retryable)
+                HandleRetryableError(timeoutEx, pendingEmail);
+            }
+            catch (SmtpCommandException smtpEx)
+            {
+                // SmtpCommandException occurred (retryable)
+                HandleRetryableError(smtpEx, pendingEmail);
+            }
+            catch (SmtpProtocolException protocolEx)
+            {
+                // SmtpProtocolException occurred (retryable)
+                HandleRetryableError(protocolEx, pendingEmail);
             }
             catch (Exception ex)
             {
-
-                pendingEmail.Status = MessageStatusEnums.Failed;
-                pendingEmail.FailedDate = DateTime.Now;
-                pendingEmail.ResponseMessage = ex.Message;
-                _logger.LogError(ex.Message);
-
+                // Other exceptions
+                HandleNonRetryableError(ex, pendingEmail);
             }
         }
+        private void HandleRetryableError(Exception ex, EmailModel pendingEmail)
+        {
+            // Log the error
+            _logger.LogError(ex.Message + " retrying......");
 
+            // Set email status as failed
+            pendingEmail.Status = MessageStatusEnums.Pending;
+            pendingEmail.FailedDate = DateTime.Now;
+            pendingEmail.Sentdate = DateTime.Now;
+            pendingEmail.ResponseMessage = ex.Message;
+        }
+
+        private void HandleNonRetryableError(Exception ex, EmailModel pendingEmail)
+        {
+            // Log the error
+            _logger.LogError(ex.Message);
+            // Set email status as failed
+            pendingEmail.Status = MessageStatusEnums.Failed;
+            pendingEmail.FailedDate = DateTime.Now;
+            pendingEmail.ResponseMessage = ex.Message;
+
+            // Additional error handling for non-retryable errors
+            // (e.g., send notification to administrators, escalate the issue, etc.)
+        }
         //public Task SendEmail(EmailModel pendingEmail, SMTPSettings sMTP)
         //{
         //    throw new NotImplementedException();

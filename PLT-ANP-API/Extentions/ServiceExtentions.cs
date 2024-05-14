@@ -63,9 +63,12 @@ namespace PLT_ANP_API.Extentions
 
         public static void ConfigureSqlContext(this IServiceCollection services, IConfiguration configuration)
         {
-            
+            var connectionString = Environment.GetEnvironmentVariable("sqlConnection");
+            connectionString ??= configuration.GetConnectionString("sqlConnection");
+
+
             services.AddDbContext<RepositoryContext>(opts =>
-                opts.UseSqlServer(configuration.GetConnectionString("sqlConnection")));
+                opts.UseSqlServer(connectionString));
         }
 
         public static void ConfigureEmailServices(this IServiceCollection services)

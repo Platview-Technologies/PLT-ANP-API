@@ -32,7 +32,7 @@ namespace Service
                 Email = email
             };
             _repository.TempUser.CreateTempUser(tempUser);
-            _repository.Save();
+            await _repository.SaveAsync();
             return tempUser.Id;
         }
 
@@ -45,7 +45,7 @@ namespace Service
             {
                 await _userManager.DeleteAsync(user);
             }
-            _repository.Save();
+            await _repository.SaveAsync();
         }
 
         public async Task<IEnumerable<UserToReturnUserDto>> GetAllTempUser()

@@ -8,15 +8,15 @@ namespace PLT_ANP_API.ContextFactory
     {
         public RepositoryContext CreateDbContext(string[] args)
         {
-           
+            var connectionString = Environment.GetEnvironmentVariable("sqlConnection");
             var configuration = new ConfigurationBuilder()
                .SetBasePath(Directory.GetCurrentDirectory())
                .AddJsonFile("appsettings.json")
                .Build();
 
-
+            connectionString ??= configuration.GetConnectionString("sqlConnection");
             var builder = new DbContextOptionsBuilder<RepositoryContext>()
-        .UseSqlServer(configuration.GetConnectionString("sqlConnection"),
+        .UseSqlServer(connectionString,
         b => b.MigrationsAssembly("PLT-ANP-API"));
             return new RepositoryContext(builder.Options);
         }

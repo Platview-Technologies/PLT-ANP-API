@@ -116,7 +116,7 @@ namespace Service.BackgroundServices
         private async Task SendEmailsAsync(IEnumerable<EmailModel> pendingEmails)
         {
             // Send each email asynchronously
-            var tasks = pendingEmails.Select(email => _emailService.SendEmail(email, _sMTPSettings));
+            var tasks = pendingEmails.Select(async email => await _emailService.SendEmail(email, _sMTPSettings));
             await Task.WhenAll(tasks);
         }
 
@@ -126,7 +126,7 @@ namespace Service.BackgroundServices
         private async Task SendNotificationsAsync(IEnumerable<NotificationModel> pendingNotification, RepositoryContext context, CancellationToken cancellationToken)
         {
             // Send each notification asynchronously
-            var tasks = pendingNotification.Select(notification => _notificationService.SendNotification(notification, _sMTPSettings));
+            var tasks = pendingNotification.Select(async notification => await _notificationService.SendNotification(notification, _sMTPSettings));
             await Task.WhenAll(tasks);
         }
 
@@ -141,7 +141,7 @@ namespace Service.BackgroundServices
                 var deals = await _service.DealService.GetActiveDeals(false);
 
                 // Create notifications for each deal
-                var tasks = deals.Select(deals => CheckDealsAndCreateNotificationAsync(deals));
+                var tasks = deals.Select(async deals => await CheckDealsAndCreateNotificationAsync(deals));
                 await Task.WhenAll(tasks);
             }
             catch (Exception ex)
@@ -199,12 +199,12 @@ namespace Service.BackgroundServices
                     }
                 }
             }
-            else if (timeDifference.TotalDays <= 0)
+            else if (timeDifference.TotalDays <= 0 && timeDifference.TotalDays >= -1)
             {
                 if (lastNotification != null)
                 {
                     TimeSpan timeD = lastNotification.UpdatedDate - DateTime.Today;
-                    if (timeD.TotalDays >= 1)
+                    if (timeD.TotalDays >= 1 )
                     {
                         await _notificationService.CreateNotification(deal.ContactEmail, deal, EmailTypeEnums.Expiration);
                         return;

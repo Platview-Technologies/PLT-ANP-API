@@ -4,6 +4,7 @@ using Contracts;
 using Entities.Exceptions;
 using Entities.Models;
 using Entities.SystemModel;
+using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
 using Service.Contract;
@@ -100,7 +101,7 @@ namespace Service
                 }
                 
 
-                using (var client = new MailKit.Net.Smtp.SmtpClient())
+                using (var client = new SmtpClient())
                 {
                     //client.EnableSsl = sMTP.SSLStatus;
                     //client.Host = sMTP.HostServer;
@@ -114,30 +115,77 @@ namespace Service
 
                     if (confirmedEmails.Count() == splittedEmails.Count())
                     {
+                        _logger.LogInfo("sent....");
                         pendingNotifications.Status = MessageStatusEnums.Sent;
                         pendingNotifications.Sentdate = DateTime.Now;
                         pendingNotifications.ResponseMessage = sentConfirmation;
                         pendingNotifications.Subject = content.Subject;
                         pendingNotifications.Message = content.Message;
+                        pendingNotifications.ToUpdate();
                     }
                     else
                     {
-                        
+                        _logger.LogInfo("sent.... partially");
                         pendingNotifications.Status = MessageStatusEnums.SentPartially;
                         pendingNotifications.ResponseMessage = "Unable to send to these emails: " + string.Join(",", unConfirmedEmails) + ". Either Email(s) does not exist or their respective domain(s) has expired";
                         pendingNotifications.Sentdate = DateTime.Now;
                         pendingNotifications.FailedDate = DateTime.Now;
+                        pendingNotifications.ToUpdate();
                     }
                 }
             }
+            catch (IOException ioEx)
+            {
+                // IOException occurred (retryable)
+                HandleRetryableError(ioEx, pendingNotifications);
+            }
+            catch (TimeoutException timeoutEx)
+            {
+                // TimeoutException occurred (retryable)
+                HandleRetryableError(timeoutEx, pendingNotifications);
+            }
+            catch (SmtpCommandException smtpEx)
+            {
+                // SmtpCommandException occurred (retryable)
+                HandleRetryableError(smtpEx, pendingNotifications);
+            }
+            catch (SmtpProtocolException protocolEx)
+            {
+                // SmtpProtocolException occurred (retryable)
+                HandleRetryableError(protocolEx, pendingNotifications);
+            }
             catch (Exception ex)
             {
-                pendingNotifications.Status = MessageStatusEnums.Failed;
-                pendingNotifications.FailedDate = DateTime.Now;
-                pendingNotifications.ResponseMessage = ex.Message;
-
+                // Other exceptions
+                HandleNonRetryableError(ex, pendingNotifications);
             }
-      
+        }
+        private void HandleRetryableError(Exception ex, NotificationModel pendingNotifications)
+        {
+            // Log the error
+            _logger.LogError(ex.Message + " retrying......");
+
+            // Set email status as failed
+            pendingNotifications.Status = MessageStatusEnums.Pending;
+            pendingNotifications.FailedDate = DateTime.Now;
+            pendingNotifications.Sentdate = DateTime.Now;
+            pendingNotifications.ResponseMessage = ex.Message;
+            pendingNotifications.ToUpdate();
+
+
+        }
+
+        private void HandleNonRetryableError(Exception ex, NotificationModel pendingNotifications)
+        {
+            // Log the error
+            _logger.LogError(ex.Message);
+            // Set email status as failed
+            pendingNotifications.Status = MessageStatusEnums.Failed;
+            pendingNotifications.FailedDate = DateTime.Now;
+            pendingNotifications.ResponseMessage = ex.Message;
+            pendingNotifications.ToUpdate();
+            // Additional error handling for non-retryable errors
+            // (e.g., send notification to administrators, escalate the issue, etc.)
         }
         private static async Task<string[]> SortEmails(NotificationModel pendingNotification, List<string> confirmedEmails, List<string> unConfirmedEmails)
         {
@@ -193,6 +241,9 @@ namespace Service
                         subjectAndMessage = await GetUserSubjectAndMessage(notification);
                         break;
                     case EmailTypeEnums.Reminder:
+                        subjectAndMessage = await GetUserSubjectAndMessage(notification);
+                        break;
+                    case EmailTypeEnums.Expiration:
                         subjectAndMessage = await GetUserSubjectAndMessage(notification);
                         break;
                     default:

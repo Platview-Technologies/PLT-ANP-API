@@ -30,7 +30,7 @@ namespace Service
 
             var dealToCreate = _mapper.Map<DealsModel>(dealRequest);
             _repository.Deal.CreateDeal(dealToCreate);
-            _repository.Save();
+            await _repository.SaveAsync();
             var dealToReturn = _mapper.Map<DealResponseDto>(dealToCreate);
             return dealToReturn;
         }
@@ -66,7 +66,7 @@ namespace Service
             await DealExist(dealUpdate.Name, dealUpdate.ClientName, trackChanges);
             var updatedDeal = _mapper.Map(dealUpdate, dealToUpdate);
             updatedDeal.ToUpdate();
-            _repository.Save();
+            await _repository.SaveAsync();
         }
 
         private protected async Task DealExist(string name, string client, bool trackChanges)

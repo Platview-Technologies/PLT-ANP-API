@@ -1,4 +1,5 @@
 ﻿using Contract;
+using System.Runtime.CompilerServices;
 
 namespace Repository
 {
@@ -27,14 +28,11 @@ namespace Repository
 
         public INotificationRepository Notification => _notificationRepository.Value;
 
-        public void Save()
-        {
-            _repositoryContext.SaveChanges();
-        }
-
         public async Task SaveAsync()
         {
             await _repositoryContext.SaveChangesAsync();
         }
+
+        
     }
 }
