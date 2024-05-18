@@ -52,9 +52,7 @@ namespace PLT_ANP_API.Presentation.Controllers
         {
             var deal = await _service.DealService.GetDeal(Id, false);
             return Ok(deal);
-
         }
-
 
         [HttpPost(Name = "CreatedDeal")]
         [ProducesResponseType(201)]

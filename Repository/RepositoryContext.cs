@@ -33,7 +33,7 @@ namespace Repository
                 .HasForeignKey(c => c.DealId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.ApplyConfiguration(new RoleConfiguration());
+            //modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
             //modelBuilder.Entity<UserModel>()
             //    .Has

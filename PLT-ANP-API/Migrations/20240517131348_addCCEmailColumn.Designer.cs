@@ -12,8 +12,8 @@ using Repository;
 namespace PLT_ANP_API.Migrations
 {
     [DbContext(typeof(RepositoryContext))]
-    [Migration("20240510170514_ProductionInitialMigration")]
-    partial class ProductionInitialMigration
+    [Migration("20240517131348_addCCEmailColumn")]
+    partial class addCCEmailColumn
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -30,6 +30,9 @@ namespace PLT_ANP_API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("CCEmails")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ClientName")
                         .IsRequired()
                         .HasMaxLength(30)
@@ -40,8 +43,7 @@ namespace PLT_ANP_API.Migrations
 
                     b.Property<string>("ContactEmail")
                         .IsRequired()
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("ContactFirstName")
                         .IsRequired()
@@ -52,7 +54,15 @@ namespace PLT_ANP_API.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ContactPhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiryDate")
                         .HasColumnType("datetime2");
 
                     b.Property<bool>("IsActive")
@@ -66,8 +76,12 @@ namespace PLT_ANP_API.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
-                    b.Property<DateTime>("RenewalDate")
+                    b.Property<DateTime?>("RenewalDate")
+                        .IsRequired()
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("Status")
+                        .HasColumnType("bit");
 
                     b.Property<byte[]>("Timestamp")
                         .IsConcurrencyToken()
@@ -405,22 +419,6 @@ namespace PLT_ANP_API.Migrations
                         .HasFilter("[NormalizedName] IS NOT NULL");
 
                     b.ToTable("AspNetRoles", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "8fb06856-e313-4457-b15a-349a3a630600",
-                            ConcurrencyStamp = "169e121e-bbcc-4341-94f1-18af8c2414aa",
-                            Name = "Admin",
-                            NormalizedName = "ADMIN"
-                        },
-                        new
-                        {
-                            Id = "e7f94863-0595-45ea-9e97-b3786c934c08",
-                            ConcurrencyStamp = "11cc467d-d305-4448-ad58-f4277b4e227c",
-                            Name = "Staff",
-                            NormalizedName = "STAFF"
-                        });
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -44,7 +44,9 @@ namespace Service
                 UpdatedDate = DateTime.Now,
                 Status = MessageStatusEnums.Pending,
                 EmailType = type,
-                DealId = deal.Id
+                DealId = deal.Id,
+                CCEmails = deal.CCEmails
+                
             };
 
             _repository.Notification.CreateNotification(_);
@@ -71,7 +73,7 @@ namespace Service
 
                 List<string> confirmedEmails = new List<string>();
                 List<string> unConfirmedEmails = new List<string>();
-                string[] splittedEmails = await SortEmails(pendingNotifications, confirmedEmails, unConfirmedEmails);
+                ICollection<string> splittedEmails = await SortEmails(pendingNotifications, confirmedEmails, unConfirmedEmails);
                 if (confirmedEmails.Count() == 0)
                 {
                     pendingNotifications.Status = MessageStatusEnums.Failed;
@@ -91,9 +93,14 @@ namespace Service
                     Text = content.Message
                 };
                 var ccEmails = Environment.GetEnvironmentVariable(Constants.ccEmail);
+                
                 if (!string.IsNullOrEmpty(ccEmails))
                 {
                     var ccEmailList = ccEmails.Split(Constants.Comma).Select(x => x.Trim()).ToList();
+                    if (pendingNotifications.CCEmails != null)
+                    {
+                        ccEmailList.AddRange(Helper.ConvertToList(pendingNotifications.CCEmails));
+                    }
                     foreach (var ccEmail in ccEmailList)
                     {
                         mail.Cc.Add(MailboxAddress.Parse(ccEmail));
@@ -171,8 +178,6 @@ namespace Service
             pendingNotifications.Sentdate = DateTime.Now;
             pendingNotifications.ResponseMessage = ex.Message;
             pendingNotifications.ToUpdate();
-
-
         }
 
         private void HandleNonRetryableError(Exception ex, NotificationModel pendingNotifications)
@@ -187,9 +192,9 @@ namespace Service
             // Additional error handling for non-retryable errors
             // (e.g., send notification to administrators, escalate the issue, etc.)
         }
-        private static async Task<string[]> SortEmails(NotificationModel pendingNotification, List<string> confirmedEmails, List<string> unConfirmedEmails)
+        private static async Task<ICollection<string>> SortEmails(NotificationModel pendingNotification, List<string> confirmedEmails, List<string> unConfirmedEmails)
         {
-            string[] splittedEmails = pendingNotification.Emailaddresses.Split(",");
+            ICollection<string> splittedEmails = Helper.ConvertToList(pendingNotification.Emailaddresses);
             DNSCheck dNSCheck = new DNSCheck();
             foreach (string email in splittedEmails)
             {
@@ -266,9 +271,9 @@ namespace Service
             string message = template.Template
                 .Replace(TagName.FirstName, deals.ClientName)
                 .Replace(TagName.Solution, deals.Name)
-                .Replace(TagName.Date, deals.RenewalDate.Day.ToString() + Helper.GetDaySuffix(deals.RenewalDate))
-                .Replace(TagName.Month, deals.RenewalDate.ToString("MMMM"))
-                .Replace(TagName.Year, deals.RenewalDate.Year.ToString());
+                .Replace(TagName.Date, deals.ExpiryDate.Day.ToString() + Helper.GetDaySuffix(deals.ExpiryDate))
+                .Replace(TagName.Month, deals.ExpiryDate.ToString("MMMM"))
+                .Replace(TagName.Year, deals.ExpiryDate.Year.ToString());
 
             string subject = template.Subject
                 .Replace(TagName.Solution, deals.Name);

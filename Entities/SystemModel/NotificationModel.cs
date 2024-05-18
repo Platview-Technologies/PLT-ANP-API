@@ -18,6 +18,8 @@ namespace Entities.SystemModel
         public DateTime? FailedDate { get; set; }
         [Column(TypeName = "nvarchar(max)")]
         public string Emailaddresses { get; set; }
+        [Column(TypeName = "nvarchar(max)")]
+        public string? CCEmails { get; set; }
 
         public string? Subject { get; set; }
         [Column(TypeName = "nvarchar(max)")]

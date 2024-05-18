@@ -27,7 +27,6 @@ namespace Service
         public async Task<DealResponseDto> CreateDeal(DealRequestDto dealRequest, bool trackChanges)
         {
             await DealExist(dealRequest.Name, dealRequest.ClientName, false);
-
             var dealToCreate = _mapper.Map<DealsModel>(dealRequest);
             _repository.Deal.CreateDeal(dealToCreate);
             await _repository.SaveAsync();

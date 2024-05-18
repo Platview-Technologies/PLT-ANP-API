@@ -7,11 +7,7 @@ using Microsoft.Extensions.Options;
 using Repository;
 using Service.Contract;
 using Utilities.Enum;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+
 
 namespace Service.BackgroundServices
 {
@@ -66,7 +62,7 @@ namespace Service.BackgroundServices
                 }
 
                 // Delay before next iteration
-                await Task.Delay(50000, stoppingToken);
+                await Task.Delay(500000, stoppingToken);
             }
         }
 
@@ -156,7 +152,7 @@ namespace Service.BackgroundServices
         /// </summary>
         private async Task CheckDealsAndCreateNotificationAsync(DealsModel deal)
         {
-            TimeSpan timeDifference = deal.RenewalDate - DateTime.Today;
+            TimeSpan timeDifference = deal.ExpiryDate - DateTime.Today;
             NotificationModel lastNotification = deal.Notifications.Where(x => x.Status == MessageStatusEnums.Sent || x.Status == MessageStatusEnums.Pending)
                 .OrderByDescending(x => x.UpdatedDate)
                 .FirstOrDefault();
