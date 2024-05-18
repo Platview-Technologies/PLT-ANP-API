@@ -372,3 +372,8 @@ FodyWeavers.xsd
 /PLT-ANP-API/Migrations/20240320071107_NotificationEngine01.Designer.cs
 /PLT-ANP-API/internal_logs/internallog.txt
 /PLT-ANP-API/Properties/launchSettings.json
+/PLT-ANP-API/Migrations/20240517101710_addedColumnRenewalDate3.cs
+/PLT-ANP-API/Migrations/20240517131348_addCCEmailColumn.cs
+/PLT-ANP-API/Migrations/20240518111025_addCcemailcolumntonotificationsmodel.cs
+/PLT-ANP-API/Migrations/20240518111240_addnullableCcemailcolumntonotificationsmodel.cs
+/PLT-ANP-API/Migrations/RepositoryContextModelSnapshot.cs
