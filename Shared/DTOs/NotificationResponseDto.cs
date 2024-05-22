@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Utilities.Enum;
 
-namespace Shared.DTOs.Response
+namespace Shared.DTOs
 {
     public class NotificationResponseDto
     {
@@ -15,7 +15,8 @@ namespace Shared.DTOs.Response
         public MessageStatusEnums Status { get; init; }
         public DateTime? Sentdate { get; init; }
         public DateTime? FailedDate { get; init; }
-        public string Emailaddresses { get; init; }
+        public ICollection<string> EmailAddresses { get; init; }
+        public ICollection<string>? CCEmails { get; set; } 
         public string? ResponseMessage { get; init; }
         public Guid DealId { get; init; }
     }

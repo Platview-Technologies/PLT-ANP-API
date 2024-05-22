@@ -39,6 +39,13 @@ namespace Repository
             .FirstOrDefaultAsync();
             
          }
+        public async Task<List<DealsModel>> UpdateGetDealsByName(string client, string name, bool trackChanges)
+        {
+            return await FindByCondition(x => x.ClientName.ToLower() == client.ToLower(), trackChanges)
+            .Where(x => x.Name.ToLower() == name.ToLower())
+            .ToListAsync();
+
+        }
     }
     
 }

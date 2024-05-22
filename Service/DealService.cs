@@ -62,7 +62,7 @@ namespace Service
         public async Task UpdateDeal(Guid id, DealUpdateDto dealUpdate, bool trackChanges)
         {
             var dealToUpdate = await DealExist(id, trackChanges);
-            await DealExist(dealUpdate.Name, dealUpdate.ClientName, trackChanges);
+            await UpdateDealExist(dealUpdate.Name,id, dealUpdate.ClientName, trackChanges);
             var updatedDeal = _mapper.Map(dealUpdate, dealToUpdate);
             updatedDeal.ToUpdate();
             await _repository.SaveAsync();
@@ -76,6 +76,23 @@ namespace Service
                 throw new ClientDealExistsException(ErrorMessage.ClientAreadyHasThisDeal);
             }
             
+        }
+        private protected async Task UpdateDealExist(string name, Guid id, string client, bool trackChanges)
+        {
+            var deal = await _repository.Deal.UpdateGetDealsByName(client, name, trackChanges);
+
+            if (deal.Count() == 0)
+            {
+                return;
+            } else if (deal.Count() > 1)
+            {
+                throw new ClientDealExistsException(ErrorMessage.ClientAreadyHasThisDeal);
+            } else if (deal[0].Id != id)
+            {
+                throw new ClientDealExistsException(ErrorMessage.ClientAreadyHasThisDeal);
+            }
+
+
         }
         private protected async Task<DealsModel> DealExist(Guid id, bool trackChanges) 
         {

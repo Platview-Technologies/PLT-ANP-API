@@ -1,6 +1,4 @@
-﻿
-
-namespace Shared.DTOs.Response
+﻿namespace Shared.DTOs.Response
 {
     public record DealResponseDto : DealDto
     {

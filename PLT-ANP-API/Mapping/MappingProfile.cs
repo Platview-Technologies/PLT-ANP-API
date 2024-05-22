@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Entities.Models;
 using Entities.SystemModel;
+using Shared.DTOs;
 using Shared.DTOs.Request;
 using Shared.DTOs.Response;
 using Utilities.Utilities;
@@ -28,8 +29,12 @@ namespace PLT_ANP_API.Mapping
             CreateMap<DealsModel, PaginatedDealResponseDto>()
                 .ForMember(dest => dest.ContactEmail, opt => opt.MapFrom(src => Helper.ConvertToList(src.ContactEmail)))
                 .ForMember(dest => dest.CCEmails, opt => opt.MapFrom(src => src.CCEmails != null ? Helper.ConvertToList(src.CCEmails) : null));
-            CreateMap<NotificationModel, NotificationResponseDto>();
-            CreateMap<NotificationModel, NotificationDto>();
+            CreateMap<NotificationModel, NotificationResponseDto>()
+                .ForMember(dest => dest.EmailAddresses, opt => opt.MapFrom(src => Helper.ConvertToList(src.Emailaddresses)))
+                .ForMember(dest => dest.CCEmails, opt => opt.MapFrom(src => src.CCEmails != null ? Helper.ConvertToList(src.CCEmails) : null));
+            CreateMap<NotificationModel, NotificationDto>()
+                .ForMember(dest => dest.EmailAddresses, opt => opt.MapFrom(src => Helper.ConvertToList(src.Emailaddresses)))
+                .ForMember(dest => dest.CCEmails, opt => opt.MapFrom(src => src.CCEmails != null ? Helper.ConvertToList(src.CCEmails) : null));
         }
     }
 }

@@ -11,6 +11,7 @@ namespace Contract
         Task<DealsModel> GetDeal(Guid id, bool trackChanges);
         Task<DealsModel> GetDealByName(string client, string name, bool trackChanges);
         Task<PagedList<DealsModel>> GetDealsByPage(bool trackChanges, int page, int pageSize);
+        Task<List<DealsModel>> UpdateGetDealsByName(string client, string name, bool trackChanges);
 
     }
 }
