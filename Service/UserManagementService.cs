@@ -81,8 +81,11 @@ namespace Service
                 var user_ = await _userManager.FindByIdAsync(UserId);
                 var roles = await _userManager.GetRolesAsync(user_);
                 var _ = await _repository.TempUser.GetTempUserByUserId(UserId, false);
+                var MFAEnabled = await _userManager.GetTwoFactorEnabledAsync(user_);
+
                 var user = _mapper.Map<UserToReturnUserDto>(_);
                 user.Roles = roles;
+                user.MFAEnabled = MFAEnabled;
                 return user;
             }catch (Exception ex)
             {

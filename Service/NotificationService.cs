@@ -68,6 +68,7 @@ namespace Service
                     pendingNotifications.FailedDate = DateTime.Now;
                     pendingNotifications.ResponseMessage = "SMTP not configured yet";
                     _logger.LogError("SMTP not configured yet");
+                    await _repository.SaveAsync();
                     return;
                 }
 
@@ -79,7 +80,7 @@ namespace Service
                     pendingNotifications.Status = MessageStatusEnums.Failed;
                     pendingNotifications.FailedDate = DateTime.Now;
                     pendingNotifications.ResponseMessage = "Email(s) does not exist or their respective domain(s) has expired";
-
+                    await _repository.SaveAsync();
                     return;
                 }
 
@@ -129,6 +130,7 @@ namespace Service
                         pendingNotifications.Subject = content.Subject;
                         pendingNotifications.Message = content.Message;
                         pendingNotifications.ToUpdate();
+                        await _repository.SaveAsync();
                     }
                     else
                     {
@@ -138,36 +140,37 @@ namespace Service
                         pendingNotifications.Sentdate = DateTime.Now;
                         pendingNotifications.FailedDate = DateTime.Now;
                         pendingNotifications.ToUpdate();
+                        await _repository.SaveAsync();
                     }
                 }
             }
             catch (IOException ioEx)
             {
                 // IOException occurred (retryable)
-                HandleRetryableError(ioEx, pendingNotifications);
+                await HandleRetryableErrorAsync(ioEx, pendingNotifications);
             }
             catch (TimeoutException timeoutEx)
             {
                 // TimeoutException occurred (retryable)
-                HandleRetryableError(timeoutEx, pendingNotifications);
+                await HandleRetryableErrorAsync(timeoutEx, pendingNotifications);
             }
             catch (SmtpCommandException smtpEx)
             {
                 // SmtpCommandException occurred (retryable)
-                HandleRetryableError(smtpEx, pendingNotifications);
+                await HandleRetryableErrorAsync(smtpEx, pendingNotifications);
             }
             catch (SmtpProtocolException protocolEx)
             {
                 // SmtpProtocolException occurred (retryable)
-                HandleRetryableError(protocolEx, pendingNotifications);
+                await HandleRetryableErrorAsync(protocolEx, pendingNotifications);
             }
             catch (Exception ex)
             {
                 // Other exceptions
-                HandleNonRetryableError(ex, pendingNotifications);
+                await HandleNonRetryableError(ex, pendingNotifications);
             }
         }
-        private void HandleRetryableError(Exception ex, NotificationModel pendingNotifications)
+        private async Task HandleRetryableErrorAsync(Exception ex, NotificationModel pendingNotifications)
         {
             // Log the error
             _logger.LogError(ex.Message + " retrying......");
@@ -178,9 +181,10 @@ namespace Service
             pendingNotifications.Sentdate = DateTime.Now;
             pendingNotifications.ResponseMessage = ex.Message;
             pendingNotifications.ToUpdate();
+            await _repository.SaveAsync();
         }
 
-        private void HandleNonRetryableError(Exception ex, NotificationModel pendingNotifications)
+        private async Task HandleNonRetryableError(Exception ex, NotificationModel pendingNotifications)
         {
             // Log the error
             _logger.LogError(ex.Message);
@@ -189,6 +193,7 @@ namespace Service
             pendingNotifications.FailedDate = DateTime.Now;
             pendingNotifications.ResponseMessage = ex.Message;
             pendingNotifications.ToUpdate();
+            await _repository.SaveAsync();
             // Additional error handling for non-retryable errors
             // (e.g., send notification to administrators, escalate the issue, etc.)
         }

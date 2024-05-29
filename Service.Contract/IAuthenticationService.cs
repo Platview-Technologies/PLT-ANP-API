@@ -12,11 +12,16 @@ namespace Service.Contract
         Task<IdentityResult> RegisterNormalUser(NormalUserRegistrationDto normalUser);
         Task<string> GetEmailConfirmationToken(UserModel user);
         Task<IdentityResult> ActivateAccount(AccountActivationByEmailDto accountActivation);
-        Task<TokenDto> ValidateUser(UserForAuthenticationDto userForAuth);
+        Task<IAuthResponse> ValidateUser(UserForAuthenticationDto userForAuth);
         //Task<TokenDto> CreateToken(bool populateExp);
         Task<TokenDto> RefreshToken(TokenDto tokenDto);
         UserRegTokenDto CreateUserRegCode(string email);
         Task ForgetPassword(NewUserAddDto user);
         Task<IdentityResult> ChangePassword(ForgetPasswordDto forgetPassword);
+        Task<MFAKeyURLDto> Enrole2FA(string userId);
+        Task VerifyAuthenticator(string userId, VerifyAuthenticatorDto authenticatorDto);
+        Task<TokenDto> Verify2fa(Verify2faDto model);
+
+
     }
 }

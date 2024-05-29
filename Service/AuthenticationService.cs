@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MimeKit.Cryptography;
+using OtpNet;
 using Service.Contract;
 using Shared.DTOs;
 using Shared.DTOs.Request;
@@ -33,6 +34,7 @@ namespace Service
         private readonly JwtConfiguration _jwtConfiguration;
         private readonly RoleManager<IdentityRole> _roleManager;
         private UserModel? _user;
+        
 
         public AuthenticationService(
             ILoggerManager logger,
@@ -74,7 +76,7 @@ namespace Service
             var refreshToken = GenerateRefreshToken();
 
             _user.RefreshToken = refreshToken;
-            
+
             if (populateExp)
                 _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(Convert.ToDouble(_jwtConfiguration.rExpires));
 
@@ -82,7 +84,7 @@ namespace Service
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
             // Write the token as a string
-            return new TokenDto() { AccessToken = accessToken, RefreshToken = refreshToken};
+            return new TokenDto() { AccessToken = accessToken, RefreshToken = refreshToken };
         }
 
         public Task<string> GetEmailConfirmationToken(UserModel user)
@@ -103,7 +105,7 @@ namespace Service
             return await CreateToken(populateExp: false);
         }
 
-        
+
 
         public async Task<IdentityResult> RegisterAdminUser(UserAdminRegistrationDto userAdminRegistration)
         {
@@ -156,13 +158,13 @@ namespace Service
                   .ToList();
                 // Add user to the roles and user join table
                 await _userManager.AddToRolesAsync(user, validRoles);
-                _emailService.CreateEmail(user.Email, tempUser.Id, null,emailType:EmailTypeEnums.NewAccount);
+                _emailService.CreateEmail(user.Email, tempUser.Id, null, emailType: EmailTypeEnums.NewAccount);
                 await SyncTempUserAndUserAsync(email, user, validRoles[0]);
             }
             return result;
         }
 
-        public async Task<TokenDto> ValidateUser(UserForAuthenticationDto userForAuth)
+        public async Task<IAuthResponse> ValidateUser(UserForAuthenticationDto userForAuth)
         {
             _user = await _userManager.FindByEmailAsync(userForAuth.Email);
 
@@ -172,6 +174,42 @@ namespace Service
 
             if (!result)
                 throw new InvalidCredentialsException();
+            if (!_user.IsActive)
+            {
+                throw new ActivateUserException();
+            }
+            if (await _userManager.GetTwoFactorEnabledAsync(_user))
+            {
+                // Send 2FA code or direct user to verify 2FA
+                return new TwoFactorResponse()
+                {
+                    Requires2FA = true,
+                    UserId = _user.Id,
+                    Email = _user.Email
+                };
+            }
+
+
+            return await CreateToken(populateExp: true);
+        }
+
+
+
+        public async Task<TokenDto> Verify2fa(Verify2faDto model)
+        {
+            _user = await _userManager.FindByEmailAsync(model.Email);
+            if (_user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
+           _user, TokenOptions.DefaultAuthenticatorProvider, model.Code);
+
+            if (!is2faTokenValid)
+            {
+                throw new InvalidCodeException("Invalid verification code.");
+            }
             if (!_user.IsActive)
             {
                 throw new ActivateUserException();
@@ -247,7 +285,7 @@ namespace Service
         private static string GenerateRefreshToken()
         {
             var randomNumber = new byte[32];
-            
+
             using (var rng = RandomNumberGenerator.Create())
             {
                 rng.GetBytes(randomNumber);
@@ -274,7 +312,8 @@ namespace Service
 
             // Validate the token and retrieve the principal
             SecurityToken securityToken;
-            try { 
+            try
+            {
                 var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
 
                 // Check if the token is a valid JwtSecurityToken
@@ -288,7 +327,9 @@ namespace Service
 
                 // Return the principal extracted from the token
                 return principal;
-            } catch (Exception ex) {
+            }
+            catch (Exception ex)
+            {
                 throw new RefreshTokenBadRequest();
             }
         }
@@ -312,7 +353,7 @@ namespace Service
 
         }
 
-         private static List<Claim> GetClaims(string email)
+        private static List<Claim> GetClaims(string email)
         {
             var claims = new List<Claim>
             {
@@ -370,13 +411,13 @@ namespace Service
 
             if (emailClaim == null)
             {
-                throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token)); 
+                throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
             }
-            
+
 
             // Check if the token is a valid JwtSecurityToken
             var jwtSecurityToken = securityToken as JwtSecurityToken;
-            
+
             if (jwtSecurityToken == null ||
                 !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
@@ -411,7 +452,7 @@ namespace Service
             if (tempUser != null)
             {
                 _logger.LogWarn("user already exists");
-                
+
             }
             var _tempUser = new TempUserModel()
             {
@@ -419,7 +460,7 @@ namespace Service
                 IsActive = true,
                 UserId = user.Id,
                 Role = roles
-                
+
             };
             _repository.TempUser.CreateTempUser(_tempUser);
             await _repository.SaveAsync();
@@ -448,11 +489,82 @@ namespace Service
                     _emailService.CreateEmail(tempUser.Email, tempUser.Id, forgetPassword.Token, EmailTypeEnums.ChangePassword);
                 }
                 return result;
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 _logger.LogError(ex.Message);
                 return new IdentityResult();
             }
+        }
+
+        public async Task<MFAKeyURLDto> Enrole2FA(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+            if (user == null)
+            {
+                throw new NotFoundException("User not found");
+            }
+
+            var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+            if (string.IsNullOrEmpty(unformattedKey))
+            {
+                await _userManager.ResetAuthenticatorKeyAsync(user);
+                unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
+            }
+            var key = FormatKey(unformattedKey);
+            var uri = GenerateQrCodeUri(user.Email, unformattedKey);
+
+            return new MFAKeyURLDto()
+            {
+                key = key,
+                uri = uri
+            };
+        }
+
+
+        private string FormatKey(string unformattedKey)
+        {
+            var result = new StringBuilder();
+            int currentPosition = 0;
+            while (currentPosition + 4 < unformattedKey.Length)
+            {
+                result.Append(unformattedKey.Substring(currentPosition, 4)).Append(" ");
+                currentPosition += 4;
+            }
+            if (currentPosition < unformattedKey.Length)
+            {
+                result.Append(unformattedKey.Substring(currentPosition));
+            }
+
+            return result.ToString().ToLowerInvariant();
+        }
+
+        private string GenerateQrCodeUri(string email, string unformattedKey)
+        {
+            return string.Format(
+                $"otpauth://totp/{_jwtConfiguration.ValidIssuer}:{email}?secret={unformattedKey}&issuer={_jwtConfiguration.ValidIssuer}&digits=6"
+                );
+        }
+
+        public async Task VerifyAuthenticator(string userId, VerifyAuthenticatorDto authenticatorDto)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
+
+            if (user == null)
+            {
+                throw new NotFoundException("User not Found");
+            }
+
+            var verificationCode = authenticatorDto.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
+
+            var is2faTokenValid = await _userManager.VerifyTwoFactorTokenAsync(
+            user, _userManager.Options.Tokens.AuthenticatorTokenProvider, verificationCode);
+            if (!is2faTokenValid)
+            {
+                throw new Exception("Invalid verification code.");
+            }
+            await _userManager.SetTwoFactorEnabledAsync(user, true);
+            return;
         }
     }
 }

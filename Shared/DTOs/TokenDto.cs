@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Shared.DTOs
 {
     [Serializable]
-    public record TokenDto()
+    public record TokenDto: IAuthResponse
     {
         [Required]
         public string AccessToken { get; set; }

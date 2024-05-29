@@ -83,7 +83,7 @@ namespace Service
                     pendingEmail.FailedDate = DateTime.Now;
                     pendingEmail.ResponseMessage = "SMTP not configure yet";
                     _logger.LogError("SMTP not configured yet");
-
+                    await _repository.SaveAsync();
                     return;
                 }
                 List<string> confirmedEmails = new List<string>();
@@ -95,7 +95,7 @@ namespace Service
                     pendingEmail.Status = MessageStatusEnums.Failed;
                     pendingEmail.FailedDate = DateTime.Now;
                     pendingEmail.ResponseMessage = "Email(s) does not exist or their respective domain(s) has expired";
-
+                    await _repository.SaveAsync();
                     return;
                 }
 
@@ -151,6 +151,7 @@ namespace Service
                         pendingEmail.Sentdate = DateTime.Now;
                         pendingEmail.ResponseMessage = sentConfirmation;
                         _logger.LogInfo("sent....");
+                        await _repository.SaveAsync();
                     }
                     else
                     {
@@ -159,36 +160,37 @@ namespace Service
                         pendingEmail.Sentdate = DateTime.Now;
                         pendingEmail.FailedDate = DateTime.Now;
                         _logger.LogInfo("sent....");
+                        await _repository.SaveAsync();
                     }
                 }
             }
             catch (IOException ioEx)
             {
                 // IOException occurred (retryable)
-                HandleRetryableError(ioEx, pendingEmail);
+                await HandleRetryableErrorAsync(ioEx, pendingEmail);
             }
             catch (TimeoutException timeoutEx)
             {
                 // TimeoutException occurred (retryable)
-                HandleRetryableError(timeoutEx, pendingEmail);
+                await HandleRetryableErrorAsync(timeoutEx, pendingEmail);
             }
             catch (SmtpCommandException smtpEx)
             {
                 // SmtpCommandException occurred (retryable)
-                HandleRetryableError(smtpEx, pendingEmail);
+                await HandleRetryableErrorAsync(smtpEx, pendingEmail);
             }
             catch (SmtpProtocolException protocolEx)
             {
                 // SmtpProtocolException occurred (retryable)
-                HandleRetryableError(protocolEx, pendingEmail);
+                await HandleRetryableErrorAsync(protocolEx, pendingEmail);
             }
             catch (Exception ex)
             {
                 // Other exceptions
-                HandleNonRetryableError(ex, pendingEmail);
+                await HandleNonRetryableErrorAsync(ex, pendingEmail);
             }
         }
-        private void HandleRetryableError(Exception ex, EmailModel pendingEmail)
+        private async Task HandleRetryableErrorAsync(Exception ex, EmailModel pendingEmail)
         {
             // Log the error
             _logger.LogError(ex.Message + " retrying......");
@@ -198,9 +200,10 @@ namespace Service
             pendingEmail.FailedDate = DateTime.Now;
             pendingEmail.Sentdate = DateTime.Now;
             pendingEmail.ResponseMessage = ex.Message;
+            await _repository.SaveAsync();
         }
 
-        private void HandleNonRetryableError(Exception ex, EmailModel pendingEmail)
+        private async Task HandleNonRetryableErrorAsync(Exception ex, EmailModel pendingEmail)
         {
             // Log the error
             _logger.LogError(ex.Message);
@@ -208,6 +211,7 @@ namespace Service
             pendingEmail.Status = MessageStatusEnums.Failed;
             pendingEmail.FailedDate = DateTime.Now;
             pendingEmail.ResponseMessage = ex.Message;
+            await _repository.SaveAsync();
 
             // Additional error handling for non-retryable errors
             // (e.g., send notification to administrators, escalate the issue, etc.)

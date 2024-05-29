@@ -16,5 +16,6 @@ namespace Shared.DTOs.Response
         public ICollection<string> Roles { get; set; }
         public DateTime CreatedDate { get; set; }
         public string Role { get; set; }
+        public bool MFAEnabled { get; set; }
     }
 }

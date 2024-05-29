@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using PLT_ANP_API.Presentation.ActionFilters;
 using Service.Contract;
+using Shared.DTOs;
 using Shared.DTOs.Request;
 using Shared.DTOs.Response;
 using System.Security.Claims;
@@ -66,11 +67,19 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
                 SameSite = SameSiteMode.None, // Adjust as per your requirements
                 MaxAge = TimeSpan.FromDays(7), // Set the cookie's expiration time
                 Expires = DateTime.Now.AddDays(7),
+                
             };
+           
+            if (userResponse is TokenDto tokenResponse)
+            {
 
-            Response.Cookies.Append("rt", userResponse.RefreshToken, cookieOptions);
-            Response.Cookies.Append("aT", userResponse.AccessToken, cookieOptions);
-            return Ok(new ATokenDto() {AccessToken = userResponse.AccessToken });
+            Response.Cookies.Append("rt", tokenResponse.RefreshToken, cookieOptions);
+            Response.Cookies.Append("aT", tokenResponse.AccessToken, cookieOptions);
+            return Ok(new ATokenDto() {AccessToken = tokenResponse.AccessToken });
+            }else
+            {
+                return Ok(userResponse);
+            }
         }
 
         [HttpPost("RegisterUser")]
