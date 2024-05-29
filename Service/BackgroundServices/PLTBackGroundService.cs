@@ -46,19 +46,19 @@ namespace Service.BackgroundServices
             {
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
-                    //var context = scope.ServiceProvider.GetRequiredService<RepositoryContext>();
+                    var context = scope.ServiceProvider.GetRequiredService<RepositoryContext>();
                     _emailService = scope.ServiceProvider.GetRequiredService<IEmailService>();
                     _notificationService = scope.ServiceProvider.GetRequiredService<INotificationService>();
                     _service = scope.ServiceProvider.GetRequiredService<IServiceManager>();
 
                     // Process pending emails
-                    await SendEmailsInBatchesAsync(stoppingToken);
+                    await SendEmailsInBatchesAsync(context, stoppingToken);
 
                     // Create notifications
                     await CreateNotification();
 
                     // Process pending notifications
-                    await SendNotificationsInBatchesAsync(stoppingToken);
+                    await SendNotificationsInBatchesAsync(context, stoppingToken);
                 }
 
                 // Delay before next iteration
@@ -69,13 +69,13 @@ namespace Service.BackgroundServices
         /// <summary>
         /// Sends emails in batches asynchronously.
         /// </summary>
-        private async Task SendEmailsInBatchesAsync(CancellationToken cancellationToken)
+        private async Task SendEmailsInBatchesAsync(RepositoryContext context, CancellationToken cancellationToken)
         {
             try
             {
                 var pendingEmails = await _emailService.GetPendingEmails(0, pageSize);
                 await SendEmailsAsync(pendingEmails);
-                
+                await context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -89,13 +89,13 @@ namespace Service.BackgroundServices
         /// <summary>
         /// Sends notifications in batches asynchronously.
         /// </summary>
-        private async Task SendNotificationsInBatchesAsync( CancellationToken cancellationToken)
+        private async Task SendNotificationsInBatchesAsync(RepositoryContext context, CancellationToken cancellationToken)
         {
             try
             {
                 var pendingNotifications = await _notificationService.GetPendingNotifications(0, pageSize);
-                await SendNotificationsAsync(pendingNotifications, cancellationToken);
-                
+                await SendNotificationsAsync(pendingNotifications, context, cancellationToken);
+                await context.SaveChangesAsync(cancellationToken);
             }
             catch (Exception ex)
             {
@@ -112,18 +112,27 @@ namespace Service.BackgroundServices
         private async Task SendEmailsAsync(IEnumerable<EmailModel> pendingEmails)
         {
             // Send each email asynchronously
-            var tasks = pendingEmails.Select(async email => await _emailService.SendEmail(email, _sMTPSettings));
-            await Task.WhenAll(tasks);
+            //var tasks = pendingEmails.Select(async email => await _emailService.SendEmail(email, _sMTPSettings));
+            //await Task.WhenAll(tasks);
+            foreach (EmailModel email in pendingEmails)
+            {
+                await _emailService.SendEmail(email, _sMTPSettings);
+            }
         }
 
         /// <summary>
         /// Sends notifications asynchronously.
         /// </summary>
-        private async Task SendNotificationsAsync(IEnumerable<NotificationModel> pendingNotification, CancellationToken cancellationToken)
+        private async Task SendNotificationsAsync(IEnumerable<NotificationModel> pendingNotification, RepositoryContext context, CancellationToken cancellationToken)
         {
             // Send each notification asynchronously
-            var tasks = pendingNotification.Select(async notification => await _notificationService.SendNotification(notification, _sMTPSettings));
-            await Task.WhenAll(tasks);
+            //var tasks = pendingNotification.Select(async notification => await _notificationService.SendNotification(notification, _sMTPSettings));
+            //await Task.WhenAll(tasks);
+
+            foreach (NotificationModel notification in pendingNotification)
+            {
+                await _notificationService.SendNotification(notification, _sMTPSettings);
+            }
         }
 
         /// <summary>
@@ -137,8 +146,13 @@ namespace Service.BackgroundServices
                 var deals = await _service.DealService.GetActiveDeals(false);
 
                 // Create notifications for each deal
-                var tasks = deals.Select(async deals => await CheckDealsAndCreateNotificationAsync(deals));
-                await Task.WhenAll(tasks);
+                //var tasks = deals.Select(async deals => await CheckDealsAndCreateNotificationAsync(deals));
+                //await Task.WhenAll(tasks);
+
+                foreach (DealsModel deal in deals)
+                {
+                    await CheckDealsAndCreateNotificationAsync(deal);
+                }
             }
             catch (Exception ex)
             {
