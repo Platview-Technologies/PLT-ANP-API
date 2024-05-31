@@ -20,11 +20,17 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         {
             _services = services;
         }
+        private protected string GetUserId()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            return userId;
+        }
+
         [Authorize]
         [HttpGet("enable-authenticator")]
         public async Task<IActionResult> EnableAuthenticator()
         {
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userId = GetUserId();
             var mfaInfo = await _services.AuthenticationService.Enrole2FA(userId);
             return Ok(mfaInfo);
         }
@@ -32,10 +38,9 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         [HttpPost("verify-authenticator")]
         public async Task<IActionResult> VerifyAuthenticator([FromBody] VerifyAuthenticatorDto model)
         {
-            string userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            string userId = GetUserId();
             await _services.AuthenticationService.VerifyAuthenticator(userId, model);
             return Ok();
-
         }
 
         [HttpPost("VerifyMFAUser")]
@@ -56,6 +61,15 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             Response.Cookies.Append("aT", tokenResponse.AccessToken, cookieOptions);
             return Ok(new ATokenDto() { AccessToken = tokenResponse.AccessToken });
             
+        }
+
+        [HttpPost("Disable2fa")]
+        [Authorize]
+        public async Task<IActionResult> Disable2fa()
+        {
+            string userId = GetUserId();
+            await _services.AuthenticationService.Disable2faAsync(userId);
+            return Ok();
         }
     }
 }

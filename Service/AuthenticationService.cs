@@ -548,12 +548,7 @@ namespace Service
 
         public async Task VerifyAuthenticator(string userId, VerifyAuthenticatorDto authenticatorDto)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
-            {
-                throw new NotFoundException("User not Found");
-            }
+            var user = await UserExist(userId);
 
             var verificationCode = authenticatorDto.Code.Replace(" ", string.Empty).Replace("-", string.Empty);
 
@@ -566,7 +561,27 @@ namespace Service
             await _userManager.SetTwoFactorEnabledAsync(user, true);
             return;
         }
+        private async Task<UserModel> UserExist(string userId)
+        {
+            var user = await _userManager.FindByIdAsync(userId);
 
-        
+            if (user == null)
+            {
+                throw new NotFoundException("User not Found");
+            }
+            return user;
+        }
+        public async Task Disable2faAsync(string userId)
+        {
+            var user = await UserExist(userId);
+
+            var disableResult = await _userManager.SetTwoFactorEnabledAsync(user, false);
+
+            if (!disableResult.Succeeded) { 
+                throw new BadRequestException("Unable to diable 2FA");
+            }
+            return;
+        }   
     }
+
 }

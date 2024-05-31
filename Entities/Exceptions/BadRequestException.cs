@@ -8,7 +8,7 @@ namespace Entities.Exceptions
 {
     public class BadRequestException: Exception
     {
-        protected BadRequestException(string message)
+        public BadRequestException(string message)
            : base(message)
         {
 

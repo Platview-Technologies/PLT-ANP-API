@@ -156,7 +156,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return userId;
         }
-
+        
 
     }
 }

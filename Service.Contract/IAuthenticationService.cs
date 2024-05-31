@@ -21,7 +21,7 @@ namespace Service.Contract
         Task<MFAKeyURLDto> Enrole2FA(string userId);
         Task VerifyAuthenticator(string userId, VerifyAuthenticatorDto authenticatorDto);
         Task<TokenDto> Verify2fa(Verify2faDto model);
-
+        Task Disable2faAsync(string userId);
 
     }
 }
