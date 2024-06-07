@@ -11,6 +11,7 @@ namespace Repository
         private readonly Lazy<IEmailTemplateRepository> _emailTemplateRepository;
         private readonly Lazy<ITempUserRepository> _tempUserRepository;
         private readonly Lazy<INotificationRepository> _notificationRepository;
+        private readonly Lazy<ILoginSessionRepository> _loginSessionRepository;
 
         public RepositoryManager(RepositoryContext repositoryContext)
         {
@@ -20,6 +21,7 @@ namespace Repository
             _emailTemplateRepository = new Lazy<IEmailTemplateRepository>(() => new EmailTemplateRepository(repositoryContext));
             _tempUserRepository = new Lazy<ITempUserRepository>(() => new TempUserRepository(repositoryContext));
             _notificationRepository = new Lazy<INotificationRepository>(() => new NotificationRepository(repositoryContext));
+            _loginSessionRepository = new Lazy<ILoginSessionRepository>(() => new LoginSessionsRepository(repositoryContext));
         }
         public IDealsRepository Deal => _dealsRepository.Value;
         public IEmailRepository Email => _emailRepository.Value;
@@ -27,6 +29,7 @@ namespace Repository
         public ITempUserRepository TempUser => _tempUserRepository.Value;
 
         public INotificationRepository Notification => _notificationRepository.Value;
+        public ILoginSessionRepository LoginSession => _loginSessionRepository.Value;
 
         public async Task SaveAsync()
         {

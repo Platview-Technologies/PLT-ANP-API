@@ -13,6 +13,7 @@ namespace Contract
         IEmailRepository Email { get; }
         ITempUserRepository TempUser { get; }
         INotificationRepository Notification { get;  }
+        ILoginSessionRepository LoginSession { get; }
         Task SaveAsync();
 
        

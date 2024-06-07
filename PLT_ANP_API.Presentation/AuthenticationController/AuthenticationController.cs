@@ -49,7 +49,8 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> Authenticate([FromBody] UserForAuthenticationDto user)
         {
-            var userResponse = await _service.AuthenticationService.ValidateUser(user);
+            string? DeviceId = Request.Cookies["dI"];
+            var userResponse = await _service.AuthenticationService.ValidateUser(user, DeviceId);
             return Ok(userResponse);
         }
 
@@ -59,7 +60,9 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         [ServiceFilter(typeof(ValidationFilterAttribute))]
         public async Task<IActionResult> AuthenticateCookie([FromBody] UserForAuthenticationDto user)
         {
-            var userResponse = await _service.AuthenticationService.ValidateUser(user);
+            string? DeviceId = Request.Cookies["dI"];
+
+            var userResponse = await _service.AuthenticationService.ValidateUser(user, DeviceId);
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
@@ -73,9 +76,10 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             if (userResponse is TokenDto tokenResponse)
             {
 
-            Response.Cookies.Append("rt", tokenResponse.RefreshToken, cookieOptions);
-            Response.Cookies.Append("aT", tokenResponse.AccessToken, cookieOptions);
-            return Ok(new ATokenDto() {AccessToken = tokenResponse.AccessToken });
+                Response.Cookies.Append("rt", tokenResponse.RefreshToken, cookieOptions);
+                Response.Cookies.Append("aT", tokenResponse.AccessToken, cookieOptions);
+                Response.Cookies.Append("dI", tokenResponse.DeviceId.ToString(), cookieOptions);
+                return Ok(new ATokenDto() {AccessToken = tokenResponse.AccessToken });
             }else
             {
                 return Ok(userResponse);

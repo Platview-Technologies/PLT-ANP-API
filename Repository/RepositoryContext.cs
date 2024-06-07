@@ -15,6 +15,9 @@ namespace Repository
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            
+
             modelBuilder.Entity<EmailModel>()
                 .HasOne(c => c.Owner)
                 .WithMany(p => p.Emails)
@@ -33,6 +36,11 @@ namespace Repository
                 .HasForeignKey(c => c.DealId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<LoginSessions>()
+                .HasOne(c => c.User)
+                .WithMany(k => k.Sessions)
+                .HasForeignKey(c => c.UserId)
+                .IsRequired(true);
             //modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
             //modelBuilder.Entity<UserModel>()
@@ -44,5 +52,6 @@ namespace Repository
         public DbSet<EmailTemplateModel> EmailTemplates { get; set; }
         public DbSet<NotificationModel> Notifications { get; set; }
         public DbSet<TempUserModel> TempUser { get; set; }
+        public DbSet<LoginSessions> LoginSessions { get; set; }
     }
 }   

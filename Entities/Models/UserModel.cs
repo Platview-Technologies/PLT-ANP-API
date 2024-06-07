@@ -25,6 +25,7 @@ namespace Entities.Models
         public ICollection<EmailModel> Emails { get; set; }
         public Guid? TempUserId { get; set; }
         public TempUserModel? TempUser { get; set; }
+        public ICollection<LoginSessions> Sessions { get; set; }
 
     }
 }

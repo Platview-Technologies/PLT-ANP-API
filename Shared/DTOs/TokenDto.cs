@@ -10,5 +10,8 @@ namespace Shared.DTOs
         public string AccessToken { get; set; }
         [Required]
         public string RefreshToken { get; set; }
+        [Required]
+        public Guid DeviceId { get; set; }
+
     }
 }

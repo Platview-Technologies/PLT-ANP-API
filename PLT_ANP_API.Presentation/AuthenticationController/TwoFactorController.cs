@@ -46,7 +46,8 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         [HttpPost("VerifyMFAUser")]
         public async Task<IActionResult> VeryfyMFAUser([FromBody] Verify2faDto model)
         {
-            var tokenResponse = await _services.AuthenticationService.Verify2fa(model);
+            string DeviceId = Request.Cookies["dI"];
+            var tokenResponse = await _services.AuthenticationService.Verify2fa(model, DeviceId);
             var cookieOptions = new CookieOptions
             {
                 HttpOnly = true,
@@ -59,6 +60,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             
             Response.Cookies.Append("rt", tokenResponse.RefreshToken, cookieOptions);
             Response.Cookies.Append("aT", tokenResponse.AccessToken, cookieOptions);
+            Response.Cookies.Append("dI", tokenResponse.DeviceId.ToString(), cookieOptions);
             return Ok(new ATokenDto() { AccessToken = tokenResponse.AccessToken });
             
         }

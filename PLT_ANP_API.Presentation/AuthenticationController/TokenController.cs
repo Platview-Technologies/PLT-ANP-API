@@ -32,14 +32,17 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
         {
             string refreshToken = Request.Cookies["rt"];
             string accessToken = Request.Cookies["aT"];
-            if (refreshToken == null || accessToken == null)
+            string DeviceId = Request.Cookies["dI"];
+            if (refreshToken == null || accessToken == null || DeviceId == null)
             {
                 return Unauthorized();
             }
+
             var tokenDto = new TokenDto()
             {
                 AccessToken = accessToken,
-                RefreshToken = refreshToken
+                RefreshToken = refreshToken,
+                DeviceId = new(DeviceId)
             };
 
             var returnToken = await _service.AuthenticationService.RefreshToken(tokenDto);
@@ -54,6 +57,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
 
             Response.Cookies.Append("rt", returnToken.RefreshToken, cookieOptions);
             Response.Cookies.Append("aT", returnToken.AccessToken, cookieOptions);
+            Response.Cookies.Append("dI", returnToken.DeviceId.ToString(), cookieOptions);
             return Ok(new ATokenDto() { AccessToken = returnToken.AccessToken });
         }
     }

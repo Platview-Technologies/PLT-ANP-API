@@ -62,7 +62,7 @@ namespace Service
             throw new NotImplementedException();
         }
 
-        private protected async Task<TokenDto> CreateToken(bool populateExp)
+        private protected async Task<TokenDto> CreateToken(bool populateExp, string deviceId)
         {
             // Get the signing credentials used to sign the token
             var signingCredentials = GetSigningCredentials();
@@ -75,16 +75,73 @@ namespace Service
 
             var refreshToken = GenerateRefreshToken();
 
-            _user.RefreshToken = refreshToken;
-
-            if (populateExp)
-                _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(Convert.ToDouble(_jwtConfiguration.rExpires));
-
-            await _userManager.UpdateAsync(_user);
+            //if (populateExp)
+            //    _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(Convert.ToDouble(_jwtConfiguration.rExpires));
+            var refreshTokenExpiryTime = DateTime.Now.AddDays(Convert.ToDouble(_jwtConfiguration.rExpires));
+           
+            var sessioninfo = await CreateLoginSessionAsync(refreshToken, refreshTokenExpiryTime, deviceId);
 
             var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
             // Write the token as a string
-            return new TokenDto() { AccessToken = accessToken, RefreshToken = refreshToken };
+            return new TokenDto() { AccessToken = accessToken, RefreshToken = refreshToken, DeviceId = sessioninfo.DeviceId };
+        }
+
+        private protected async Task<TokenDto> CreateTokenRefresh(bool populateExp, LoginSessions session)
+        {
+            // Get the signing credentials used to sign the token
+            var signingCredentials = GetSigningCredentials();
+
+            // Get the claims associated with the authenticated user
+            var claims = await GetClaims();
+
+            // Generate the options for the JWT token
+            var tokenOptions = GenerateTokenOptions(signingCredentials, claims);
+
+
+            //if (populateExp)
+            //    _user.RefreshTokenExpiryTime = DateTime.Now.AddDays(Convert.ToDouble(_jwtConfiguration.rExpires));
+            //var refreshTokenExpiryTime = DateTime.Now.AddDays(Convert.ToDouble(_jwtConfiguration.rExpires));
+
+            var accessToken = new JwtSecurityTokenHandler().WriteToken(tokenOptions);
+            // Write the token as a string
+            return new TokenDto() { AccessToken = accessToken, RefreshToken = session.RefreshToken, DeviceId = session.DeviceId };
+        }
+
+        private async Task<LoginSessions> CreateLoginSessionAsync (string refreshToken, DateTime expiryDate, string deviceId)
+        {
+            try
+            {
+                LoginSessions? prevSession = null;
+                if (deviceId != null)
+                {
+                    prevSession = await _repository.LoginSession.GetLoginSessionByDeviceId(new (deviceId), true);
+                }
+
+                if (prevSession != null)
+                {
+                    prevSession.RefreshToken = refreshToken;
+                    prevSession.ExpirationDate = expiryDate;
+                    prevSession.ToUpdate();
+                    
+                } else
+                {
+                    prevSession = new LoginSessions()
+                    {
+                        UserId = _user.Id,
+                        RefreshToken = refreshToken,
+                        ExpirationDate = expiryDate,
+                    };
+
+                    _repository.LoginSession.CreateLoginSession(prevSession);
+                }
+                await _repository.SaveAsync();
+                return prevSession;
+            }
+            catch(Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw new BadRequestException("Error while creating session");
+            }
         }
 
         public Task<string> GetEmailConfirmationToken(UserModel user)
@@ -95,16 +152,32 @@ namespace Service
         public async Task<TokenDto> RefreshToken(TokenDto tokenDto)
         {
             var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
+            var session = await _repository.LoginSession.GetLoginSessionByDeviceId(tokenDto.DeviceId, false);
 
             var user = await _userManager.FindByEmailAsync(principal.Identity.Name);
-            if (user == null || user.RefreshToken != tokenDto.RefreshToken ||
-                user.RefreshTokenExpiryTime <= DateTime.Now)
+            if (user == null || session == null || session.RefreshToken != tokenDto.RefreshToken || session.CheckExpiry())
+            {
                 throw new RefreshTokenBadRequest();
+            }
             _user = user;
 
-            return await CreateToken(populateExp: false);
+            return await CreateTokenRefresh(populateExp: false, session);
         }
 
+        public async Task<TokenDto> RefreshToken2(TokenDto tokenDto)
+        {
+            var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);
+            var session = await _repository.LoginSession.GetLoginSessionByDeviceId(tokenDto.DeviceId, false);
+
+            var user = await _userManager.FindByEmailAsync(principal.Identity.Name);
+            if (user == null || session == null || session.RefreshToken != tokenDto.RefreshToken || session.CheckExpiry())
+            {
+                throw new RefreshTokenBadRequest();
+            }
+            _user = user;
+
+            return await CreateTokenRefresh(populateExp: false, session);
+        }
 
 
         public async Task<IdentityResult> RegisterAdminUser(UserAdminRegistrationDto userAdminRegistration)
@@ -164,7 +237,7 @@ namespace Service
             return result;
         }
 
-        public async Task<IAuthResponse> ValidateUser(UserForAuthenticationDto userForAuth)
+        public async Task<IAuthResponse> ValidateUser(UserForAuthenticationDto userForAuth, string? DeviceId)
         {
             _user = await _userManager.FindByEmailAsync(userForAuth.Email);
 
@@ -190,12 +263,12 @@ namespace Service
             }
 
 
-            return await CreateToken(populateExp: true);
+            return await CreateToken(populateExp: true, DeviceId);
         }
 
 
 
-        public async Task<TokenDto> Verify2fa(Verify2faDto model)
+        public async Task<TokenDto> Verify2fa(Verify2faDto model, string DeviceId)
         {
             _user = await _userManager.FindByEmailAsync(model.Email);
             if (_user == null)
@@ -215,7 +288,7 @@ namespace Service
                 throw new ActivateUserException();
             }
 
-            return await CreateToken(populateExp: true);
+            return await CreateToken(populateExp: true, DeviceId);
         }
 
         private protected void ValidateLicense(string code)
@@ -291,6 +364,7 @@ namespace Service
                 rng.GetBytes(randomNumber);
                 return Convert.ToBase64String(randomNumber);
             }
+
         }
         private ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
@@ -322,7 +396,7 @@ namespace Service
                     !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
                 {
                     // Throw an exception if the token is invalid
-                    throw new SecurityTokenException(string.Format(Constants.InvalidSubject, Constants.Token));
+                    throw new RefreshTokenBadRequest();
                 }
 
                 // Return the principal extracted from the token
@@ -582,6 +656,8 @@ namespace Service
             }
             return;
         }   
+
+        
     }
 
 }
