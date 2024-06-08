@@ -34,12 +34,12 @@ namespace Entities.Models
         public DateTime ExpiryDate { get; set; }
         [Required(ErrorMessage = "Renewal Date for Deal is Required")]
         [DataType(DataType.DateTime)]
-        public DateTime? RenewalDate { get; set; }
+        
         public ICollection<NotificationModel> Notifications { get; set; }
+        public ICollection<RenewalsModel> Renewals { get; set; }
         public bool IsActive { get; set; } = false;
         public bool Status { get; set; } = false;
-        
-       
+        public decimal Value { get; set; } 
         
     }
 }

@@ -41,6 +41,20 @@ namespace Repository
                 .WithMany(k => k.Sessions)
                 .HasForeignKey(c => c.UserId)
                 .IsRequired(true);
+
+            modelBuilder.Entity<RenewalsModel>()
+                .Property(c => c.Value)
+                .HasColumnType("decimal(10, 2)");
+
+            modelBuilder.Entity<DealsModel>()
+                .Property(c => c.Value)
+                .HasColumnType("decimal(10, 2)");
+
+            modelBuilder.Entity<RenewalsModel>()
+                .HasOne(c => c.Deal)
+                .WithMany(l => l.Renewals)
+                .HasForeignKey(c => c.DealId)
+                .IsRequired(true);
             //modelBuilder.ApplyConfiguration(new RoleConfiguration());
 
             //modelBuilder.Entity<UserModel>()
@@ -53,5 +67,6 @@ namespace Repository
         public DbSet<NotificationModel> Notifications { get; set; }
         public DbSet<TempUserModel> TempUser { get; set; }
         public DbSet<LoginSessions> LoginSessions { get; set; }
+        public DbSet<RenewalsModel> Renewals { get; set; }
     }
 }   
