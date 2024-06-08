@@ -39,5 +39,7 @@ namespace Entities.Models
         public bool IsActive { get; set; } = false;
         public bool Status { get; set; } = false;
         
+       
+        
     }
 }
