@@ -160,7 +160,28 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             return userId;
         }
-        
+
+        [HttpPost("logout")]
+        [ProducesResponseType(typeof(StatusCodeResult), StatusCodes.Status200OK)]
+        [Authorize]
+        public async Task<IActionResult> Logout()
+        {
+            string refreshToken = Request.Cookies["rt"];
+            string DeviceId = Request.Cookies["dI"];
+            if (refreshToken == null || DeviceId == null)
+            {
+
+                Response.Cookies.Delete("dI");
+                Response.Cookies.Delete("rt");
+                Response.Cookies.Delete("aT");
+                return Ok();
+            }
+            await _service.AuthenticationService.LogoutUserAsync(DeviceId, refreshToken);
+            Response.Cookies.Delete("dI");
+            Response.Cookies.Delete("rt");
+            Response.Cookies.Delete("aT");
+            return Ok();
+        }
 
     }
 }

@@ -60,5 +60,7 @@ namespace PLT_ANP_API.Presentation.AuthenticationController
             Response.Cookies.Append("dI", returnToken.DeviceId.ToString(), cookieOptions);
             return Ok(new ATokenDto() { AccessToken = returnToken.AccessToken });
         }
+
+        
     }
 }

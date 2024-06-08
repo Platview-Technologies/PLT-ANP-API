@@ -164,6 +164,17 @@ namespace Service
             return await CreateTokenRefresh(populateExp: false, session);
         }
 
+        public async Task LogoutUserAsync(string deviceId, string refreshToken)
+        {
+            var session = await _repository.LoginSession.GetLoginSessionByDeviceId(new(deviceId), true);
+
+            if (session != null)
+            {
+                _repository.LoginSession.DeleteSession(session);
+                await _repository.SaveAsync();
+            }
+        }
+
         public async Task<TokenDto> RefreshToken2(TokenDto tokenDto)
         {
             var principal = GetPrincipalFromExpiredToken(tokenDto.AccessToken);

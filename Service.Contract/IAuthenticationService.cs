@@ -15,6 +15,7 @@ namespace Service.Contract
         Task<IAuthResponse> ValidateUser(UserForAuthenticationDto userForAuth, string? DeviceId);
         //Task<TokenDto> CreateToken(bool populateExp);
         Task<TokenDto> RefreshToken(TokenDto tokenDto);
+        Task LogoutUserAsync(string deviceId, string refreshToken);
         UserRegTokenDto CreateUserRegCode(string email);
         Task ForgetPassword(NewUserAddDto user);
         Task<IdentityResult> ChangePassword(ForgetPasswordDto forgetPassword);
