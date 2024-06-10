@@ -20,8 +20,6 @@ namespace Entities.Models
         public DateTime? UpdatedDate { get; set; }
         public bool IsActive { get; set; }
         public bool IsDeleted { get; set; }
-        public string? RefreshToken { get; set; }
-        public DateTime? RefreshTokenExpiryTime { get; set; }
         public ICollection<EmailModel> Emails { get; set; }
         public Guid? TempUserId { get; set; }
         public TempUserModel? TempUser { get; set; }

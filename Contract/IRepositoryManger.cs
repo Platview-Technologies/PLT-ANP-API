@@ -14,6 +14,7 @@ namespace Contract
         ITempUserRepository TempUser { get; }
         INotificationRepository Notification { get;  }
         ILoginSessionRepository LoginSession { get; }
+        IRenewalRepository Renewal { get; }
         Task SaveAsync();
 
        

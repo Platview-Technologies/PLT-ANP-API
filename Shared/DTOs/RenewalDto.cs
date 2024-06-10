@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Utilities.Constants;
 
-namespace Entities.Models
+namespace Shared.DTOs
 {
-    public class RenewalsModel : EntityBase<Guid>
+    public abstract record RenewalDto
     {
-        [Required(ErrorMessage = "Deal is a required field.")]
-        public DealsModel Deal { get; set; }
-
+        
         [Required(ErrorMessage = "Deal ID is a required field.")]
         public Guid DealId { get; set; }
 
@@ -16,18 +19,11 @@ namespace Entities.Models
         public decimal Value { get; set; }
 
         [Required(ErrorMessage = "Date renewed is a required field.")]
+        [DateTimeNotDefault(ErrorMessage = "Date renewed is a required field.")]
         [DataType(DataType.DateTime)]
         public DateTime DateRenewed { get; set; }
         [Required(ErrorMessage = "Term must be specified")]
+        [DateTimeNotDefault(ErrorMessage = "Term must be specified")]
         public int Term { get; set; }
-        [Required(ErrorMessage = "Previous Commencemnt Date for Deal is Required")]
-        [DataType(DataType.DateTime)]
-        public DateTime PrevCommencementDate { get; set; }
-        [Required(ErrorMessage = "Previous Expiry Date for Deal is Required")]
-        [DataType(DataType.DateTime)]
-        public DateTime PrevExpiryDate { get; set; }
-        [DataType(DataType.DateTime)]
-        public DateTime ExpectedRenewalDate { get; set; }
-        
     }
 }

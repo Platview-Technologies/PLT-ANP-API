@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Entities.Models;
 using Entities.SystemModel;
+using Microsoft.AspNetCore.Routing.Constraints;
 using Shared.DTOs;
 using Shared.DTOs.Request;
 using Shared.DTOs.Response;
@@ -35,6 +36,18 @@ namespace PLT_ANP_API.Mapping
             CreateMap<NotificationModel, NotificationDto>()
                 .ForMember(dest => dest.EmailAddresses, opt => opt.MapFrom(src => Helper.ConvertToList(src.Emailaddresses)))
                 .ForMember(dest => dest.CCEmails, opt => opt.MapFrom(src => src.CCEmails != null ? Helper.ConvertToList(src.CCEmails) : null));
+            CreateMap<RenewalsModel, RenewalResponseDto>();
+            CreateMap<RenewalRequestDto, RenewalsModel>()
+                .AfterMap((src, dest, context) =>
+                {
+                    if (context.Items["deal"] is DealsModel deal)
+                    {
+                        dest.ExpectedRenewalDate = deal.RenewalDate;
+                        dest.PrevCommencementDate = deal.CommencementDate;
+                        dest.PrevExpiryDate = deal.ExpiryDate;
+                        // Map other properties as needed
+                    }
+                });
         }
     }
 }
