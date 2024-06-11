@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Models
 {
@@ -12,6 +13,7 @@ namespace Entities.Models
         public Guid DealId { get; set; }
 
         [Required(ErrorMessage = "Value is a required field.")]
+        [Column(TypeName = "decimal(18,2)")]
         [Range(0, (double)decimal.MaxValue, ErrorMessage = "Value must be a positive number.")]
         public decimal Value { get; set; }
 
@@ -28,6 +30,9 @@ namespace Entities.Models
         public DateTime PrevExpiryDate { get; set; }
         [DataType(DataType.DateTime)]
         public DateTime ExpectedRenewalDate { get; set; }
-        
+        [Required(ErrorMessage = "Value Before Renewal is a required field.")]
+        [Column(TypeName = "decimal(18,2)")]
+        [Range(0, (double)decimal.MaxValue, ErrorMessage = "Value Before Renewal must be a positive number.")]
+        public decimal ValueBeforeRenewal { get; set; }
     }
 }

@@ -45,6 +45,7 @@ namespace PLT_ANP_API.Mapping
                         dest.ExpectedRenewalDate = deal.RenewalDate;
                         dest.PrevCommencementDate = deal.CommencementDate;
                         dest.PrevExpiryDate = deal.ExpiryDate;
+                        dest.ValueBeforeRenewal = deal.Value;
                         // Map other properties as needed
                     }
                 });

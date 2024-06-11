@@ -1,6 +1,7 @@
 ﻿using Entities.SystemModel;
 using Utilities.Validation;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Entities.Models
 {
@@ -41,7 +42,17 @@ namespace Entities.Models
         public ICollection<RenewalsModel> Renewals { get; set; }
         public bool IsActive { get; set; } = false;
         public bool Status { get; set; } = false;
+        [Required(ErrorMessage = "Value is a required field.")]
+        [Column(TypeName = "decimal(18,2)")]
+        [Range(0, (double)decimal.MaxValue, ErrorMessage = "Value must be a positive number.")]
         public decimal Value { get; set; } 
+        public bool IsExpired
+        {
+            get
+            {
+                return DateTime.UtcNow >= ExpiryDate;
+            }
+        }
         
     }
 }

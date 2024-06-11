@@ -38,6 +38,7 @@ namespace Service
             deal.CommencementDate = deal.ExpiryDate;
             deal.ExpiryDate = deal.ExpiryDate.AddYears(mapRenewal.Term);
             deal.RenewalDate = deal.RenewalDate.AddYears(mapRenewal.Term);
+            deal.Value = mapRenewal.Value;
             await _repository.SaveAsync();
             var renewalResponse = _mapper.Map<RenewalResponseDto>(mapRenewal);
             return renewalResponse;

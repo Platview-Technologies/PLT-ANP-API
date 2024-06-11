@@ -24,11 +24,11 @@ namespace PLT_ANP_API.Presentation.Controllers
         public async Task<IActionResult> CreateRenewal([FromBody] RenewalRequestDto renewalRequest)
         {
             var Renewal = await _service.RenewalService.CreateRenewal(renewalRequest);
-            return CreatedAtRoute("Get Renewal By Id", new { id = Renewal.Id }, Renewal);
+            return CreatedAtRoute("GetRenewalById", new { id = Renewal.Id }, Renewal);
         }
 
-        [HttpGet("{Id:Guid}")]
-        public async Task<IActionResult> GetAllRenewal(Guid Id)
+        [HttpGet("{Id:Guid}", Name = "GetRenewalById")]
+        public async Task<IActionResult> GetRenewal(Guid Id)
         {
             var Renewal = await _service.RenewalService.GetRenewalAsync(Id);
             return Ok(Renewal);

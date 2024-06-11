@@ -44,11 +44,11 @@ namespace Repository
 
             modelBuilder.Entity<RenewalsModel>()
                 .Property(c => c.Value)
-                .HasColumnType("decimal(10, 2)");
+                .HasColumnType("decimal(18, 2)");
 
             modelBuilder.Entity<DealsModel>()
                 .Property(c => c.Value)
-                .HasColumnType("decimal(10, 2)");
+                .HasColumnType("decimal(18, 2)");
 
             modelBuilder.Entity<RenewalsModel>()
                 .HasOne(c => c.Deal)
