@@ -27,8 +27,6 @@ namespace Shared.DTOs
         public DateTime DateRenewed { get; set; }
         [Required(ErrorMessage = "Term must be specified")]
         public int Term { get; set; }
-        [Required(ErrorMessage = "Value Before Renewal is a required field.")]
-        [Range(0, (double)decimal.MaxValue, ErrorMessage = "Value Before Renewal must be a positive number.")]
-        public decimal ValueBeforeRenewal {get; set;}
+  
     }
 }

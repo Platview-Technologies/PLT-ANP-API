@@ -31,7 +31,7 @@ namespace Repository
 
 
         public async Task<DealsModel> GetDeal(Guid id, bool trackChanges) =>
-            await FindByCondition(x => x.Id == id, trackChanges).Include(x => x.Notifications).SingleOrDefaultAsync();
+            await FindByCondition(x => x.Id == id, trackChanges).Include(x => x.Notifications).Include(x => x.Renewals).SingleOrDefaultAsync();
 
         public async Task<DealsModel> GetDealByName(string client, string name, bool trackChanges) {
             return await FindByCondition(x => x.ClientName.ToLower() == client.ToLower(), trackChanges)

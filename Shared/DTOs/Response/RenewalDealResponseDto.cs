@@ -8,11 +8,10 @@ using Utilities.Constants;
 
 namespace Shared.DTOs.Response
 {
-    public record RenewalResponseDto: RenewalDto
+    public record RenewalDealResponseDto: RenewalDto 
     {
         public Guid Id { get; init; }
-        [Required(ErrorMessage = "Deal is a required field.")]
-        public DealResponseDto Deal { get; set; }
+        public DealRenewalResponseDto Deal { get; set; }
         [Required(ErrorMessage = "Previous Commencemnt Date for Deal is Required")]
         [DataType(DataType.DateTime)]
         public DateTime PrevCommencementDate { get; set; }
@@ -24,5 +23,8 @@ namespace Shared.DTOs.Response
         [Required(ErrorMessage = "Value Before Renewal is a required field.")]
         [Range(0, (double)decimal.MaxValue, ErrorMessage = "Value Before Renewal must be a positive number.")]
         public decimal ValueBeforeRenewal { get; set; }
+
     }
+        
+    
 }

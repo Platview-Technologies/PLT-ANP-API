@@ -57,7 +57,7 @@ namespace PLT_ANP_API.Presentation.Controllers
         }
 
         [HttpDelete("{Id:Guid}")]
-        public async Task<IActionResult> GetRenewal(Guid Id)
+        public async Task<IActionResult> DeleteRenewal(Guid Id)
         {
             await _service.RenewalService.DeleteRenewal(Id);
             return NoContent();

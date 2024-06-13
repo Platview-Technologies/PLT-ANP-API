@@ -22,6 +22,9 @@ namespace PLT_ANP_API.Mapping
             CreateMap<DealsModel, DealResponseDto>()
                 .ForMember(dest => dest.ContactEmail, opt => opt.MapFrom(src => Helper.ConvertToList(src.ContactEmail)))
                 .ForMember(dest => dest.CCEmails, opt => opt.MapFrom(src => src.CCEmails != null ? Helper.ConvertToList(src.CCEmails) : null));
+            CreateMap<DealsModel, DealRenewalResponseDto>()
+                .ForMember(dest => dest.ContactEmail, opt => opt.MapFrom(src => Helper.ConvertToList(src.ContactEmail)))
+                .ForMember(dest => dest.CCEmails, opt => opt.MapFrom(src => src.CCEmails != null ? Helper.ConvertToList(src.CCEmails) : null));
             CreateMap<UserAdminRegistrationDto, UserModel>();
             CreateMap<TempUserModel, UserToReturnDto>();
             CreateMap<NormalUserRegistrationDto, UserModel>();
@@ -37,6 +40,7 @@ namespace PLT_ANP_API.Mapping
                 .ForMember(dest => dest.EmailAddresses, opt => opt.MapFrom(src => Helper.ConvertToList(src.Emailaddresses)))
                 .ForMember(dest => dest.CCEmails, opt => opt.MapFrom(src => src.CCEmails != null ? Helper.ConvertToList(src.CCEmails) : null));
             CreateMap<RenewalsModel, RenewalResponseDto>();
+            CreateMap<RenewalsModel, RenewalDealResponseDto>();
             CreateMap<RenewalRequestDto, RenewalsModel>()
                 .AfterMap((src, dest, context) =>
                 {
